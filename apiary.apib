@@ -1,0 +1,176 @@
+FORMAT: 1A
+HOST: http://teachers.odl.mit.edu/
+
+# ccxcon
+
+CCXCon is a simple API serves as an interface between edX running instances and different MIT apps.
+
+## Group Courses
+
+## Courses Collection [/coursexs]
+
+### List All Courses [GET]
+
++ Response 200 (application/json)
+
+### Create a New Course [POST]
+
++ Request (application/json)
+
+        {
+
+        }
+
++ Response 201 (application/json)
+
+    + Headers
+
+            Location: /coursexs/1016dd7e
+
+    + Body
+
+            {
+
+            }
+
+## Course [/coursexs/{course_uuid}]
+
++ Parameters
+    + course_uuid: `1016dd7e` (string, required) - UUID of the edX course
+
+
+### Retrieve a Course [GET]
+
++ Response 200 (application/json)
+
+        {
+
+        }
+
+### Delete Course [DELETE]
+
+Deletes a course and all of its components and CCXs associated with it.
+
++ Response 204 (application/json)
+
+
+
+### Partially update Course [PATCH]
+
++ Request (application/json)
+
+            {
+
+            }
+
++ Response 200 (application/json)
+
+            {
+
+            }
+
+
+### Update Course [PUT]
+
++ Request (application/json)
+
+            {
+
+            }
+
++ Response 200 (application/json)
+
+            {
+
+            }
+
+## Group CCXs
+
+## CCX Collection [/coursexs/{course_uuid}/ccxs]
++ Parameters
+    + course_uuid: `1016dd7e` (string, required) - UUID of the edX course
+    
+### List All CCXs  for a given Course [GET]
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+
+            } 
+
+
+### Create a New CCX Course  [POST]
+
++ Request (application/json)
+
+        {
+
+        }
+
++ Response 201 (application/json)
+
+    + Headers
+
+            Location: /coursexs/1016dd7e/components/bcfa43b4/
+
+    + Body
+
+            {
+
+            }
+            
+## CCX [/coursexs/{course_uuid}/ccxs/{ccx_uuid}]
+
++ Parameters
+    + course_uuid: `1016dd7e` (string, required) - UUID of the edX course
+    + ccx_uuid: `bcfa43b4` (string, required) - UUID of the ccx course
+
+
+### Retrieve a CCX [GET]
+
++ Response 200 (application/json)
+
+        {
+
+        }
+
+### Delete a CCX [DELETE]
+
+Deletes a CCX course and all of its components associated with it.
+
++ Response 204 (application/json)
+
+
+
+### Partially update a CCX [PATCH]
+
++ Request (application/json)
+
+            {
+
+            }
+
++ Response 200 (application/json)
+
+            {
+
+            }
+
+
+### Update a CCX [PUT]
+
++ Request (application/json)
+
+            {
+
+            }
+
++ Response 200 (application/json)
+
+            {
+
+            }
+
+
