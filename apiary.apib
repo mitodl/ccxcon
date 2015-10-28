@@ -84,12 +84,102 @@ Deletes a course and all of its components and CCXs associated with it.
 
             }
 
+
+## Group Modules
+
+## Modules collection [/coursexs/{course_uuid}/modules]
++ Parameters
+    + course_uuid: `1016dd7e` (string, required) - UUID of the edX course
+
+### List All modules  for a given Course [GET]
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+
+            }
+
+### Create a New Module  [POST]
+
++ Request (application/json)
+
+        {
+
+        }
+
++ Response 201 (application/json)
+
+    + Headers
+
+            Location: /coursexs/1016dd7e/modules/bcfa43b4/
+
+    + Body
+
+            {
+
+            }
+
+## Module [/coursexs/{course_uuid}/modules/{module_uuid}]
+
++ Parameters
+    + course_uuid: `1016dd7e` (string, required) - UUID of the edX course
+    + module_uuid: `bcfa43b4` (string, required) - UUID of the module
+
+
+### Retrieve a Module [GET]
+
++ Response 200 (application/json)
+
+        {
+
+        }
+
+### Delete a Module [DELETE]
+
+Deletes a CCX course and all of its components associated with it.
+
++ Response 204 (application/json)
+
+
+
+### Partially update a Module [PATCH]
+
++ Request (application/json)
+
+            {
+
+            }
+
++ Response 200 (application/json)
+
+            {
+
+            }
+
+
+### Update a Module [PUT]
+
++ Request (application/json)
+
+            {
+
+            }
+
++ Response 200 (application/json)
+
+            {
+
+            }
+
+
 ## Group CCXs
 
 ## CCX Collection [/coursexs/{course_uuid}/ccxs]
 + Parameters
     + course_uuid: `1016dd7e` (string, required) - UUID of the edX course
-    
+
 ### List All CCXs  for a given Course [GET]
 
 + Response 200 (application/json)
@@ -98,7 +188,7 @@ Deletes a course and all of its components and CCXs associated with it.
 
             {
 
-            } 
+            }
 
 
 ### Create a New CCX Course  [POST]
@@ -113,14 +203,14 @@ Deletes a course and all of its components and CCXs associated with it.
 
     + Headers
 
-            Location: /coursexs/1016dd7e/components/bcfa43b4/
+            Location: /coursexs/1016dd7e/ccxs/bcfa43b4/
 
     + Body
 
             {
 
             }
-            
+
 ## CCX [/coursexs/{course_uuid}/ccxs/{ccx_uuid}]
 
 + Parameters
@@ -174,3 +264,50 @@ Deletes a CCX course and all of its components associated with it.
             }
 
 
+## Group CCX Modules
+
+## Modules collection [/coursexs/{ccx_uuid}/modules]
++ Parameters
+    + ccx_uuid: `1016dd7e` (string, required) - UUID of the CCX course
+
+### List All modules associated with a given CCX [GET]
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+
+            }
+
+## Module membership [/ccxs/{ccx_uuid}/modues/{module_uuid}]
+
++ Parameters
+    + ccx_uuid: `1016dd7e` (string, required) - UUID of the CCX course
+    + module_uuid: `bcfa43b4` (string, required) - UUID of the module
+
+### Add a module to a CCX Course  [POST]
+
++ Request (application/json)
+
+        {
+
+        }
+
++ Response 201 (application/json)
+
+    + Headers
+
+            Location: /ccxs/bcfa43b4/modules/40c35471
+
+    + Body
+
+            {
+
+            }
+
+### Delete a CCX [DELETE]
+
+Deletes the association of a module from a CCX course.
+
++ Response 204 (application/json)
