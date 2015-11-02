@@ -12,48 +12,47 @@ CCXCon is a simple API serves as an interface between edX running instances and 
 ### List All Courses [GET]
 
 + Response 200 (application/json)
++ Attribute (array[Course])
 
 ### Create a New Course [POST]
 
 + Request (application/json)
 
         {
-
+          "title": "The Hobbit",
+          "author": "Bilbo Baggins",
+          "overview": "A hobbit fights some trolls then goes home.",
+          "description": "test description",
+          "video_url": "https://www.youtube.com/watch?v=ROor6_NGIWU",
+          "modules": [
+            {
+              "title": "Gandalf comes to see Bilbo",
+              "subchapters": ["test", "titles", "go", "here"]
+            }
+          ]
         }
 
 + Response 201 (application/json)
-
+    + Attributes (Course)
     + Headers
 
             Location: /coursexs/1016dd7e
-
-    + Body
-
-            {
-
-            }
 
 ## Course [/coursexs/{course_uuid}]
 
 + Parameters
     + course_uuid: `1016dd7e` (string, required) - UUID of the edX course
 
-
 ### Retrieve a Course [GET]
 
 + Response 200 (application/json)
-
-        {
-
-        }
+  + Attributes (Course)
 
 ### Delete Course [DELETE]
 
 Deletes a course and all of its components and CCXs associated with it.
 
 + Response 204 (application/json)
-
-
 
 ### Partially update Course [PATCH]
 
@@ -64,25 +63,29 @@ Deletes a course and all of its components and CCXs associated with it.
             }
 
 + Response 200 (application/json)
-
-            {
-
-            }
+  + Attributes (Course)
 
 
 ### Update Course [PUT]
 
 + Request (application/json)
 
+        {
+          "title": "The Hobbit",
+          "author": "Bilbo Baggins",
+          "overview": "A hobbit fights some trolls then goes home.",
+          "description": "test description",
+          "video_url": "https://www.youtube.com/watch?v=ROor6_NGIWU",
+          "modules": [
             {
-
+              "title": "Gandalf comes to see Bilbo",
+              "subchapters": ["test", "titles", "go", "here"]
             }
+          ]
+        }
 
 + Response 200 (application/json)
-
-            {
-
-            }
+  + Attributes (Course)
 
 
 ## Group Modules
@@ -94,32 +97,22 @@ Deletes a course and all of its components and CCXs associated with it.
 ### List All modules  for a given Course [GET]
 
 + Response 200 (application/json)
-
-    + Body
-
-            {
-
-            }
+    + Attributes (array[Module])
 
 ### Create a New Module  [POST]
 
 + Request (application/json)
 
-        {
-
-        }
+            {
+              "title": "Gandalf comes to see Bilbo",
+              "subchapters": ["test", "titles", "go", "here"],
+            }
 
 + Response 201 (application/json)
-
+    + Attributes (Course)
     + Headers
 
             Location: /coursexs/1016dd7e/modules/bcfa43b4/
-
-    + Body
-
-            {
-
-            }
 
 ## Module [/coursexs/{course_uuid}/modules/{module_uuid}]
 
@@ -131,18 +124,13 @@ Deletes a course and all of its components and CCXs associated with it.
 ### Retrieve a Module [GET]
 
 + Response 200 (application/json)
-
-        {
-
-        }
+    + Attributes (Module)
 
 ### Delete a Module [DELETE]
 
 Deletes a CCX course and all of its components associated with it.
 
 + Response 204 (application/json)
-
-
 
 ### Partially update a Module [PATCH]
 
@@ -153,10 +141,7 @@ Deletes a CCX course and all of its components associated with it.
             }
 
 + Response 200 (application/json)
-
-            {
-
-            }
+    + Attributes (Module)
 
 
 ### Update a Module [PUT]
@@ -164,14 +149,13 @@ Deletes a CCX course and all of its components associated with it.
 + Request (application/json)
 
             {
-
+              "title": "Gandalf comes to see Bilbo",
+              "subchapters": ["test", "titles", "go", "here"],
+              "price_cents": 10000
             }
 
 + Response 200 (application/json)
-
-            {
-
-            }
+    + Attributes (Module)
 
 
 ## Group CCXs
@@ -311,3 +295,25 @@ Deletes a CCX course and all of its components associated with it.
 Deletes the association of a module from a CCX course.
 
 + Response 204 (application/json)
+
+
+# Data Structures
+
+## Course (object)
++ title: Introductory Physics: Classical Mechanics (string)
++ author: David E. Pritchard (string)
++ content_summary (object)
+    + chapters: 14 (number)
+    + exams: 3 (number)
+    + resources: 4 (number)
++ video_url (string)
++ terms_url (string)
++ overview (string)
++ description: This is a college-level Introductory Netwonian Mechanics (string)
++ resources (object)
+    + modules (string) - url to list modules
+
+## Module (object)
++ title (string)
++ price_cents: 1000 (number) - price in cents to avoid poor decimal support
++ pages (array[string]) - list of strings representing chapter pages
