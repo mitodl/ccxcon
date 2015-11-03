@@ -1,0 +1,5 @@
+[run]
+data_file=/tmp/coverage
+
+[report]
+omit=*tox*

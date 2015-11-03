@@ -1,0 +1,8 @@
+language: python
+script:
+  - docker-compose run -e TOX_WORK_DIR=/tmp web tox
+  - docker-compose run web pylint courses ccxcon
+  - docker-compose up dredd
+  - docker-compose run dredd dredd
+services:
+  - docker
