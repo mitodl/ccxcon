@@ -1,0 +1,32 @@
+db:
+  image: postgres
+  ports:
+    - "5432"
+web:
+  build: .
+  command: >
+    /bin/bash -c '
+    sleep 3 &&
+    python manage.py migrate --noinput &&
+    python manage.py runserver 0.0.0.0:8077'
+  volumes:
+    - .:/src
+  environment:
+    PORT: 8077
+    DATABASE_URL: postgres://postgres@db:5432/postgres
+    TOX_WORK_DIR: .tox
+  ports:
+    - "8077:8077"
+  links:
+    - db
+dredd:
+  image: ccxcon_web
+  command: /bin/bash -c 'sleep 10 && dredd'
+  environment:
+    PYTHONPATH: /src
+    DATABASE_URL: postgres://postgres@db:5432/postgres
+  volumes:
+    - .:/src
+  links:
+    - web
+    - db

@@ -7,7 +7,7 @@ CCXCon is a simple API serves as an interface between edX running instances and 
 
 ## Group Courses
 
-## Courses Collection [/coursexs]
+## Courses Collection [/api/v1/coursexs/]
 
 ### List All Courses [GET]
 
@@ -19,17 +19,12 @@ CCXCon is a simple API serves as an interface between edX running instances and 
 + Request (application/json)
 
         {
-          "title": "The Hobbit",
-          "author": "Bilbo Baggins",
-          "overview": "A hobbit fights some trolls then goes home.",
-          "description": "test description",
-          "video_url": "https://www.youtube.com/watch?v=ROor6_NGIWU",
-          "modules": [
-            {
-              "title": "Gandalf comes to see Bilbo",
-              "subchapters": ["test", "titles", "go", "here"]
-            }
-          ]
+          "title": "Introductory Physics: Classical Mechanics",
+          "author_name": "David E. Pritchard",
+          "edx_instance": "https://edx.org",
+          "overview": "This is the course overview.",
+          "description": "This is a college level Introductory Newtonian Mechanics",
+          "video_url": "https://www.youtube.com/watch?v=ROor6_NGIWU"
         }
 
 + Response 201 (application/json)
@@ -38,10 +33,10 @@ CCXCon is a simple API serves as an interface between edX running instances and 
 
             Location: /coursexs/1016dd7e
 
-## Course [/coursexs/{course_uuid}]
+## Course [/api/v1/coursexs/{course_uuid}/]
 
 + Parameters
-    + course_uuid: `1016dd7e` (string, required) - UUID of the edX course
+    + course_uuid: `7e0e52d0386411df81ce001b631bdd31` (string, required) - UUID of the edX course
 
 ### Retrieve a Course [GET]
 
@@ -52,7 +47,7 @@ CCXCon is a simple API serves as an interface between edX running instances and 
 
 Deletes a course and all of its components and CCXs associated with it.
 
-+ Response 204 (application/json)
++ Response 204
 
 ### Partially update Course [PATCH]
 
@@ -71,17 +66,13 @@ Deletes a course and all of its components and CCXs associated with it.
 + Request (application/json)
 
         {
-          "title": "The Hobbit",
-          "author": "Bilbo Baggins",
-          "overview": "A hobbit fights some trolls then goes home.",
-          "description": "test description",
-          "video_url": "https://www.youtube.com/watch?v=ROor6_NGIWU",
-          "modules": [
-            {
-              "title": "Gandalf comes to see Bilbo",
-              "subchapters": ["test", "titles", "go", "here"]
-            }
-          ]
+          "uuid": "7e0e52d0386411df81ce001b631bdd31",
+          "title": "CHANGED: Super important physics class",
+          "author_name": "David E. Pritchard",
+          "edx_instance": "https://edx.org",
+          "overview": "This is the course overview.",
+          "description": "This is a college level Introductory Newtonian Mechanics",
+          "video_url": "https://www.youtube.com/watch?v=ROor6_NGIWU"
         }
 
 + Response 200 (application/json)
@@ -90,9 +81,9 @@ Deletes a course and all of its components and CCXs associated with it.
 
 ## Group Modules
 
-## Modules collection [/coursexs/{course_uuid}/modules]
+## Modules collection [/api/v1/coursexs/{course_uuid}/modules/]
 + Parameters
-    + course_uuid: `1016dd7e` (string, required) - UUID of the edX course
+    + course_uuid: `7e0e52d0386411df81ce001b631bdd31` (string, required) - UUID of the edX course
 
 ### List All modules  for a given Course [GET]
 
@@ -104,21 +95,21 @@ Deletes a course and all of its components and CCXs associated with it.
 + Request (application/json)
 
             {
-              "title": "Gandalf comes to see Bilbo",
-              "subchapters": ["test", "titles", "go", "here"],
+              "title": "Introduction to Quantum Bits",
+              "subchapters": ["Quarks and Similar things", "Things that are not quarks"]
             }
 
 + Response 201 (application/json)
-    + Attributes (Course)
+    + Attributes (Module)
     + Headers
 
-            Location: /coursexs/1016dd7e/modules/bcfa43b4/
+            Location: /coursexs/7e0e52d0386411df81ce001b631bdd31/modules/{uuid}/
 
-## Module [/coursexs/{course_uuid}/modules/{module_uuid}]
+## Module [/api/v1/coursexs/{course_uuid}/modules/{module_uuid}/]
 
 + Parameters
-    + course_uuid: `1016dd7e` (string, required) - UUID of the edX course
-    + module_uuid: `bcfa43b4` (string, required) - UUID of the module
+    + course_uuid: `7e0e52d0386411df81ce001b631bdd31` (string, required) - UUID of the edX course
+    + module_uuid: `1db1a8439cbf4a8f8c395ad63fb43e8a` (string, required) - UUID of the module
 
 
 ### Retrieve a Module [GET]
@@ -130,14 +121,13 @@ Deletes a course and all of its components and CCXs associated with it.
 
 Deletes a CCX course and all of its components associated with it.
 
-+ Response 204 (application/json)
++ Response 204
 
 ### Partially update a Module [PATCH]
 
 + Request (application/json)
 
             {
-
             }
 
 + Response 200 (application/json)
@@ -149,9 +139,9 @@ Deletes a CCX course and all of its components associated with it.
 + Request (application/json)
 
             {
-              "title": "Gandalf comes to see Bilbo",
-              "subchapters": ["test", "titles", "go", "here"],
-              "price_cents": 10000
+              "title": "Introduction to Quantum Bits",
+              "subchapters": ["Quarks and Similar things", "Things that are not quarks"],
+              "price_per_seat_cents": 10000
             }
 
 + Response 200 (application/json)
@@ -160,9 +150,9 @@ Deletes a CCX course and all of its components associated with it.
 
 ## Group CCXs
 
-## CCX Collection [/coursexs/{course_uuid}/ccxs]
+## CCX Collection [/api/v1/coursexs/{course_uuid}/ccxs]
 + Parameters
-    + course_uuid: `1016dd7e` (string, required) - UUID of the edX course
+    + course_uuid: `7e0e52d0386411df81ce001b631bdd31` (string, required) - UUID of the edX course
 
 ### List All CCXs  for a given Course [GET]
 
@@ -187,7 +177,7 @@ Deletes a CCX course and all of its components associated with it.
 
     + Headers
 
-            Location: /coursexs/1016dd7e/ccxs/bcfa43b4/
+            Location: /coursexs/7e0e52d0386411df81ce001b631bdd31/ccxs/bcfa43b4/
 
     + Body
 
@@ -195,10 +185,10 @@ Deletes a CCX course and all of its components associated with it.
 
             }
 
-## CCX [/coursexs/{course_uuid}/ccxs/{ccx_uuid}]
+## CCX [/api/v1/coursexs/{course_uuid}/ccxs/{ccx_uuid}]
 
 + Parameters
-    + course_uuid: `1016dd7e` (string, required) - UUID of the edX course
+    + course_uuid: `7e0e52d0386411df81ce001b631bdd31` (string, required) - UUID of the edX course
     + ccx_uuid: `bcfa43b4` (string, required) - UUID of the ccx course
 
 
@@ -250,9 +240,9 @@ Deletes a CCX course and all of its components associated with it.
 
 ## Group CCX Modules
 
-## Modules collection [/coursexs/{ccx_uuid}/modules]
+## Modules collection [/api/v1/coursexs/{ccx_uuid}/modules]
 + Parameters
-    + ccx_uuid: `1016dd7e` (string, required) - UUID of the CCX course
+    + ccx_uuid: `7e0e52d0386411df81ce001b631bdd31` (string, required) - UUID of the CCX course
 
 ### List All modules associated with a given CCX [GET]
 
@@ -264,10 +254,10 @@ Deletes a CCX course and all of its components associated with it.
 
             }
 
-## Module membership [/ccxs/{ccx_uuid}/modules/{module_uuid}]
+## Module membership [/api/v1/ccxs/{ccx_uuid}/modules/{module_uuid}]
 
 + Parameters
-    + ccx_uuid: `1016dd7e` (string, required) - UUID of the CCX course
+    + ccx_uuid: `7e0e52d0386411df81ce001b631bdd31` (string, required) - UUID of the CCX course
     + module_uuid: `bcfa43b4` (string, required) - UUID of the module
 
 ### Add a module to a CCX Course  [POST]
@@ -300,6 +290,7 @@ Deletes the association of a module from a CCX course.
 # Data Structures
 
 ## Course (object)
++ uuid (string)
 + title: Introductory Physics: Classical Mechanics (string)
 + author: David E. Pritchard (string)
 + content_summary (object)
@@ -308,12 +299,15 @@ Deletes the association of a module from a CCX course.
     + resources: 4 (number)
 + video_url (string)
 + terms_url (string)
-+ overview (string)
-+ description: This is a college-level Introductory Netwonian Mechanics (string)
++ overview: This is the course overview. (string)
++ description: This is a college level Introductory Newtonian Mechanics (string)
 + resources (object)
     + modules (string) - url to list modules
 
 ## Module (object)
-+ title (string)
-+ price_cents: 1000 (number) - price in cents to avoid poor decimal support
-+ pages (array[string]) - list of strings representing chapter pages
++ uuid: 1140283aa1b24f5e895e97a76a339040 (string)
++ title: Introduction to Quantum Bits (string)
++ price_per_seat_cents (number, required) - price in cents to avoid poor decimal support
++ subchapters (array[string]): ["Quarks and similar things", "Things that are not quarks"] - list of strings representing chapter pages
++ course: http://localhost:8000/api/v1/coursexs/7e0e52d0386411df81ce001b631bdd31/ (string) - url of the parent course
++ url: /api/v1/coursexs/7e0e52d0386411df81ce001b631bdd31/modules/1140283aa1b24f5e895e97a76a339040/ (string) - url of the module
