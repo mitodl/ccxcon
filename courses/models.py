@@ -7,6 +7,7 @@ from django.utils.encoding import python_2_unicode_compatible
 from jsonfield import JSONField
 import uuid as pyuuid
 
+
 @python_2_unicode_compatible
 class Course(models.Model):
     """
@@ -43,7 +44,7 @@ class Module(models.Model):
     uuid = models.UUIDField(default=pyuuid.uuid4, editable=False)
     course = models.ForeignKey(Course)
     title = models.CharField(max_length=255)
-    subchapters = JSONField(default=tuple()) # Array of strings.
+    subchapters = JSONField(default=tuple())  # Array of strings.
     locator_id = models.CharField(max_length=255)
     price_per_seat_cents = models.IntegerField(blank=True, null=True)
 

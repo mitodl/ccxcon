@@ -19,13 +19,16 @@ RUN adduser --disabled-password --gecos "" mitodl
 
 # Python 2
 COPY requirements.pip /tmp/requirements.pip
+COPY test_requirements.pip /tmp/test_requirements.pip
 COPY dredd_requirements.pip /tmp/dredd_requirements.pip
 
 RUN pip install -r requirements.pip &&\
+    pip install -r test_requirements.pip &&\
     pip install -r dredd_requirements.pip
 
 # Python 3
-RUN pip3 install -r requirements.pip
+RUN pip3 install -r requirements.pip &&\
+    pip3 install -r test_requirements.pip
 
 # Add project
 COPY . /src

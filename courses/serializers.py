@@ -28,13 +28,16 @@ class JsonListField(serializers.Field):
             try:
                 obj = json.loads(value)
             except ValueError as e:
-                log.info("Could not parse JSON value: %s. Reason: %s", value, e)
+                log.info(
+                    "Could not parse JSON value: %s. Reason: %s", value, e)
                 raise serializers.ValidationError("Must provide valid JSON.")
 
         if obj is not None and not isinstance(obj, list):
-            raise serializers.ValidationError("This field must be a JSON array")
+            raise serializers.ValidationError(
+                "This field must be a JSON array")
 
         return obj
+
 
 class CourseSerializer(serializers.HyperlinkedModelSerializer):
     """
@@ -42,8 +45,10 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
     """
     class Meta:  # pylint: disable=missing-docstring
         model = Course
-        fields = ('uuid', 'title', 'author_name', 'overview', 'description', 'video_url',
-                  'edx_instance', 'price_per_seat_cents', 'url')
+        fields = (
+            'uuid', 'title', 'author_name', 'overview', 'description',
+            'video_url', 'edx_instance', 'price_per_seat_cents', 'url'
+        )
         extra_kwargs = {
             'url': {'view_name': 'course-detail', 'lookup_field': 'uuid'}
         }
@@ -64,12 +69,19 @@ class ModuleSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:  # pylint: disable=missing-docstring
         model = Module
-        fields = ('uuid', 'title', 'subchapters', 'course', 'price_per_seat_cents', 'url')
+        fields = (
+            'uuid', 'title', 'subchapters', 'course',
+            'price_per_seat_cents', 'url'
+        )
 
     def absolute_url(self, obj):
         """
-        Builds aboslute url for module instance.
+        Builds absolute url for module instance.
         """
         request = self.context['request']
         return request.build_absolute_uri(
-            reverse('module-detail', kwargs={'uuid': obj.uuid, 'uuid_uuid': obj.course.uuid}))
+            reverse(
+                'module-detail',
+                kwargs={'uuid': obj.uuid, 'uuid_uuid': obj.course.uuid}
+            )
+        )

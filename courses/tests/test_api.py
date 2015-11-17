@@ -1,4 +1,4 @@
-# pylint: disable=missing-docstring
+"""Tests regarding REST API"""
 import json
 
 from django.core.urlresolvers import reverse
@@ -6,8 +6,14 @@ from django.test import TestCase
 
 from courses.factories import CourseFactory, ModuleFactory
 
+
 class ApiTests(TestCase):
+    """Tests regarding REST API"""
     def test_separate_children(self):
+        """
+        Test that a course's modules list endpoint doesn't contain modules
+        from other courses.
+        """
         m1 = ModuleFactory.create()
         m2 = ModuleFactory.create()
 
@@ -19,6 +25,9 @@ class ApiTests(TestCase):
         self.assertEqual(len(payload), 1)
 
     def test_bad_json(self):
+        """
+        Test that invalid JSON is rejected and model state is unaffected.
+        """
         course = CourseFactory.create(**{
             "title": "title1",
             "author_name": "author1",

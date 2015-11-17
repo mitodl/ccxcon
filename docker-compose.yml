@@ -15,6 +15,7 @@ web:
     PORT: 8077
     DATABASE_URL: postgres://postgres@db:5432/postgres
     TOX_WORK_DIR: .tox
+    COVERAGE_DIR: htmlcov
   ports:
     - "8077:8077"
   links:

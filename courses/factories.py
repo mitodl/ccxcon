@@ -1,13 +1,18 @@
-# pylint: disable=missing-docstring
+"""Factories for testing"""
 import factory
 from factory.django import DjangoModelFactory
 from .models import Module, Course
 
+
 class CourseFactory(DjangoModelFactory):
-    class Meta:
+    """Factory for Course"""
+    class Meta:  # pylint: disable=missing-docstring
         model = Course
 
+
 class ModuleFactory(DjangoModelFactory):
+    """Factory for Module"""
     course = factory.SubFactory(CourseFactory)
-    class Meta:
+
+    class Meta:  # pylint: disable=missing-docstring
         model = Module

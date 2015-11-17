@@ -1,5 +1,15 @@
 [run]
+branch = True
+source = .
 data_file=/tmp/coverage
+omit = 
+    ccxcon/wsgi.py
+    manage.py
+    ./.tox/*
 
 [report]
-omit=*tox*
+exclude_lines =
+    pragma: no cover
+
+[html]
+directory = ${COVERAGE_DIR}
