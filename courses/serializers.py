@@ -43,15 +43,25 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
     """
     Handles the serialization of Course objects.
     """
+    modules = serializers.SerializerMethodField('module_list')
+
     class Meta:  # pylint: disable=missing-docstring
         model = Course
         fields = (
             'uuid', 'title', 'author_name', 'overview', 'description',
-            'video_url', 'edx_instance', 'price_per_seat_cents', 'url'
+            'video_url', 'edx_instance', 'price_per_seat_cents', 'url',
+            'modules',
         )
         extra_kwargs = {
             'url': {'view_name': 'course-detail', 'lookup_field': 'uuid'}
         }
+
+    def module_list(self, obj):
+        """
+        Builds a url for module listing of this course.
+        """
+        return self.context['request'].build_absolute_uri(
+            reverse('module-list', kwargs={'uuid_uuid': obj.uuid}))
 
 
 class ModuleSerializer(serializers.HyperlinkedModelSerializer):
