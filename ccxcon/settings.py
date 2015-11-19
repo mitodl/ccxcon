@@ -106,3 +106,17 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+
+CCXCON_ALLOWED_CLIENT_KEYS = set(
+    os.getenv('ALLOWED_CLIENT_AUTH_KEYS',
+              "4d933e0d-aac9-4587-a73b-89799eb68cbf" if DEBUG else None).split(),
+    )
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'courses.authentication.KeyAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    )
+}

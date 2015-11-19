@@ -5,6 +5,16 @@ HOST: http://teachers.odl.mit.edu/
 
 CCXCon is a simple API serves as an interface between edX running instances and different MIT apps.
 
+## Authentication
+
+To authenticate with this API, you must have a known token. You can
+request these from the maintainers of this service. You pass that in
+the `Authentication` header using the token scheme. If you were given
+the key `asdf1234`, you would include a header as illustrated
+below. This is required for all requests.
+
+`Authorization: Token asdf1234`
+
 ## Group Courses
 
 ## Courses Collection [/api/v1/coursexs/]

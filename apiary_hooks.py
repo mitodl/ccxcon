@@ -8,6 +8,7 @@ import dredd_hooks as hooks  # pylint: disable=import-error
 django.setup()
 
 # This import must come after django setup
+from django.conf import settings  # noqa
 from courses.models import Course, Module  # noqa
 
 
@@ -51,6 +52,13 @@ def make_module_price_nullable(transactions):
             t['expected']['bodySchema'] = json.dumps(schema)
         except KeyError:
             pass
+
+
+@hooks.before_all
+def logged_in(transactions):
+    access_token = settings.CCXCON_ALLOWED_CLIENT_KEYS.copy().pop()
+    for t in transactions:
+        t['request']['headers']['Authorization'] = "Token {}".format(access_token)
 
 
 @hooks.before("Courses > Courses Collection > List All Courses")
