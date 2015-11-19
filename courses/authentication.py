@@ -7,7 +7,9 @@ from rest_framework import authentication, exceptions
 
 class ValidUser(object):
     """
-    Represents a valid user for login purposes.
+    Represents a valid user for login purposes. This is required to get
+    django-rest-framework to consider the request "authenticated". The
+    minimum API is a `is_authenticated` method.
     """
 
     def is_authenticated(self):  # pylint: disable=no-self-use
