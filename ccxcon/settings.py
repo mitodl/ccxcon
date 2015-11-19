@@ -109,7 +109,7 @@ STATIC_URL = '/static/'
 
 CCXCON_ALLOWED_CLIENT_KEYS = set(
     os.getenv('ALLOWED_CLIENT_AUTH_KEYS',
-              "4d933e0d-aac9-4587-a73b-89799eb68cbf" if DEBUG else None).split(),
+              "4d933e0d-aac9-4587-a73b-89799eb68cbf" if DEBUG else tuple()).split(),
     )
 
 REST_FRAMEWORK = {
