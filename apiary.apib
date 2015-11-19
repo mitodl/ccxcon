@@ -24,7 +24,8 @@ CCXCon is a simple API serves as an interface between edX running instances and 
           "edx_instance": "https://edx.org",
           "overview": "This is the course overview.",
           "description": "This is a college level Introductory Newtonian Mechanics",
-          "video_url": "https://www.youtube.com/watch?v=ROor6_NGIWU"
+          "video_url": "https://www.youtube.com/watch?v=ROor6_NGIWU",
+          "instructors": ["2d133482b3214a119f55c3060d882ceb"]
         }
 
 + Response 201 (application/json)
@@ -72,7 +73,8 @@ Deletes a course and all of its components and CCXs associated with it.
           "edx_instance": "https://edx.org",
           "overview": "This is the course overview.",
           "description": "This is a college level Introductory Newtonian Mechanics",
-          "video_url": "https://www.youtube.com/watch?v=ROor6_NGIWU"
+          "video_url": "https://www.youtube.com/watch?v=ROor6_NGIWU",
+          "instructors": ["2d133482b3214a119f55c3060d882ceb"]
         }
 
 + Response 200 (application/json)
@@ -287,6 +289,21 @@ Deletes the association of a module from a CCX course.
 + Response 204 (application/json)
 
 
+## Group Less RESTful endpoints 
+
+### User Existence Checks [GET /api/v1/user_exists/{?uid}]
+
++ Parameters
+    + uid: `861e87a0803e436b989cb62d5e672c5f` (string, required) - UUID of user to check for.
+
+
++ Response 200 (application/json)
+
+    + Body
+
+            {"exists": false}
+
+
 # Data Structures
 
 ## Course (object)
@@ -298,6 +315,7 @@ Deletes the association of a module from a CCX course.
 + overview: This is the course overview. (string)
 + description: This is a college level Introductory Newtonian Mechanics (string)
 + modules (string) - url to list modules
++ instructors (array[string])
 
 ## Module (object)
 + uuid: 1140283aa1b24f5e895e97a76a339040 (string)

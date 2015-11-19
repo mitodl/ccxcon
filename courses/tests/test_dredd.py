@@ -24,6 +24,7 @@ class DreddTestCase(LiveServerTestCase):
             "{}/apiary.apib".format(settings.BASE_DIR),
             self.live_server_url,
             "-f", "apiary_hooks.py",
+            "-r", "apiary",
             "--language", "python",
         ]
         old_url = urlparse.urlparse(os.getenv('DATABASE_URL'))
@@ -35,6 +36,7 @@ class DreddTestCase(LiveServerTestCase):
             env=dict(os.environ, **{
                 "PYTHONPATH": settings.BASE_DIR,
                 "DATABASE_URL": new_url,
-                }))
+            })
+        )
         call.wait()
-        self.assertEqual(0, call.returncode, call.stdout)
+        self.assertEqual(0, call.returncode)
