@@ -1,12 +1,10 @@
 """Hooks for dredd tests."""
 import json
-import os
 
 import django
 import dredd_hooks as hooks  # pylint: disable=import-error
 
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ccxcon.settings")
 django.setup()
 
 # This import must come after django setup

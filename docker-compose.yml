@@ -20,14 +20,3 @@ web:
     - "8077:8077"
   links:
     - db
-dredd:
-  image: ccxcon_web
-  command: /bin/bash -c 'sleep 10 && dredd'
-  environment:
-    PYTHONPATH: /src
-    DATABASE_URL: postgres://postgres@db:5432/postgres
-  volumes:
-    - .:/src
-  links:
-    - web
-    - db
