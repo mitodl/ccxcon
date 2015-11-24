@@ -1,7 +1,13 @@
 """Factories for testing"""
 import factory
 from factory.django import DjangoModelFactory
-from .models import Module, Course
+from .models import Module, Course, EdxAuthor
+
+
+class EdxAuthorFactory(DjangoModelFactory):
+    """Factory for EdxAuthor"""
+    class Meta:  # pylint: disable=missing-docstring
+        model = EdxAuthor
 
 
 class CourseFactory(DjangoModelFactory):

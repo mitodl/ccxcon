@@ -4,9 +4,10 @@ Views for powering the Course Catalog API
 from django.core.urlresolvers import reverse
 
 from rest_framework import viewsets
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .models import Course, Module
+from .models import Course, Module, EdxAuthor
 from .serializers import CourseSerializer, ModuleSerializer
 
 
@@ -45,3 +46,16 @@ class ModuleViewSet(viewsets.ModelViewSet):
         serializer = self.serializer_class(
             modules, many=True, context={'request': request})
         return Response(serializer.data)
+
+
+@api_view()
+def user_existence(request):
+    """
+    Support for validating the existence of users, ensuring that they
+    represent a real edx author.
+    """
+    uid = request.GET.get('uid')
+    if not uid:
+        return Response({"error": "Must provide a UID"}, status=400)
+
+    return Response({"exists": EdxAuthor.objects.filter(edx_uid=uid).exists()})

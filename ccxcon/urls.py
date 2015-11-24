@@ -18,4 +18,5 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api/v1/', include(router.urls)),
     url(r'^api/v1/', include(modules_router.urls)),
+    url(r'^api/v1/user_exists/$', 'courses.views.user_existence', name='user-existence'),
 ]

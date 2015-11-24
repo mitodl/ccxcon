@@ -4,12 +4,14 @@ source = .
 data_file=/tmp/coverage
 omit = 
     ccxcon/wsgi.py
+    apiary_hooks.py
     manage.py
     ./.tox/*
 
 [report]
 exclude_lines =
     pragma: no cover
+show_missing = True
 
 [html]
 directory = ${COVERAGE_DIR}

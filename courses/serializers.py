@@ -3,11 +3,13 @@ Django Rest Framework Serializers for Course API
 """
 import json
 
+from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
+from django.http import QueryDict
 from rest_framework import serializers
 import six
 
-from .models import Course, Module
+from .models import Course, Module, EdxAuthor
 
 import logging
 log = logging.getLogger(__name__)
@@ -39,18 +41,63 @@ class JsonListField(serializers.Field):
         return obj
 
 
+class StringyManyToManyField(serializers.Field):
+    """
+    Serializes out as a list of strings on the way out, but reifies into
+    real models on the way in.
+    """
+    def __init__(self, *args, **kwargs):
+        self.model = kwargs.pop('model', None)
+        self.prop = kwargs.pop('lookup', None)
+
+        if not self.model:
+            raise ImproperlyConfigured("You must provide a model to use for reifying")
+
+        if not self.prop:
+            raise ImproperlyConfigured("You must provide a field lookup to "
+                                       "convert string value into model instance.")
+
+        super(StringyManyToManyField, self).__init__(*args, **kwargs)
+
+    def to_representation(self, obj):
+        """Python object to string"""
+        return (str(i) for i in obj.all())
+
+    def get_value(self, data):
+        """Get all values provided, not just the first."""
+        if isinstance(data, QueryDict):
+            return data.getlist(self.field_name)
+        return data.get(self.field_name)
+
+    def to_internal_value(self, value):
+        """Incoming value to python value.
+        Values should only ever be a list or string."""
+        if isinstance(value, six.string_types):
+            value = [value]
+
+        if not isinstance(value, list):
+            raise serializers.ValidationError("Only supports string or list input types.")
+
+        results = []
+        for v in value:
+            model, _ = self.model.objects.get_or_create(**{self.prop: v})
+            results.append(model)
+        return results
+
+
 class CourseSerializer(serializers.HyperlinkedModelSerializer):
     """
     Handles the serialization of Course objects.
     """
     modules = serializers.SerializerMethodField('module_list')
+    instructors = StringyManyToManyField(model=EdxAuthor, lookup="edx_uid")
 
     class Meta:  # pylint: disable=missing-docstring
         model = Course
         fields = (
             'uuid', 'title', 'author_name', 'overview', 'description',
             'video_url', 'edx_instance', 'price_per_seat_cents', 'url',
-            'modules',
+            'modules', 'instructors',
         )
         extra_kwargs = {
             'url': {'view_name': 'course-detail', 'lookup_field': 'uuid'}
