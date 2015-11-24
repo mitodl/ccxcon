@@ -1,6 +1,5 @@
 language: python
 script:
   - docker-compose run -e TOX_WORK_DIR=/tmp -e COVERAGE_DIR=/tmp web tox
-  - docker-compose run web pylint courses ccxcon
 services:
   - docker
