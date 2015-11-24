@@ -1,0 +1,74 @@
+{
+    "name": "CCXCON",
+    "description": "CCX Connector",
+    "keywords": [
+        "Django",
+        "Python",
+        "MIT",
+        "Office of Digital Learning",
+        "Open edX",
+        "Custom Courses for edX"
+    ],
+    "website": "https://github.com/mitodl/ccxcon",
+    "repository": "https://github.com/mitodl/ccxcon",
+    "success_url": "/",
+    "scripts": {
+        "postdeploy": "./manage.py migrate"
+    },
+    "addons": [
+        "heroku-postgresql:hobby-dev",
+        "newrelic:wayne"
+    ],
+    "buildpacks": [
+        {
+            "url": "https://github.com/heroku/heroku-buildpack-python"
+        }
+    ],
+    "env": {
+        "ALLOWED_HOSTS": {
+            "description": "Array of allowed hostnames",
+            "default":  "['*']"
+        },
+        "CCXCON_ADMIN_EMAIL": {
+            "description": "E-mail to send 500 reports to.",
+            "required": false
+        },
+        "CCXCON_EMAIL_HOST": {
+            "description": "Outgoing e-mail settings",
+            "required": false
+        },
+        "CCXCON_EMAIL_PASSWORD": {
+            "description": "Outgoing e-mail settings",
+            "required": false
+        },
+        "CCXCON_EMAIL_PORT": {
+            "description": "Outgoing e-mail settings",
+            "required": false,
+            "value":  "587"
+        },
+        "CCXCON_EMAIL_TLS": {
+            "description": "Outgoing e-mail settings",
+            "required": false,
+            "value":  "True"
+        },
+        "CCXCON_EMAIL_USER": {
+            "description": "Outgoing e-mail settings",
+            "required": false
+        },
+        "CCXCON_FROM_EMAIL": {
+            "description": "E-mail to use for the from field"
+
+        },
+        "CCXCON_SUPPORT_EMAIL": {
+            "description": "E-mail address for support e-mails."
+        },
+        "NEW_RELIC_APP_NAME": {
+            "description": "Application identifier in New Relic.",
+            "default": "CCX Connector"
+        },
+        "SECRET_KEY": {
+            "description": "Django secret key.",
+            "generator": "secret"
+        }
+    }
+}
