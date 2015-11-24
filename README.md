@@ -1,6 +1,9 @@
 # CCXCon
 [![Build Status](https://travis-ci.org/mitodl/ccxcon.svg)](https://travis-ci.org/mitodl/ccxcon)
 
+[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+
+
 CCXCon is a simple API serves as an interface between edX running instances and different MIT apps.
 
 Implements the APIs as described here http://docs.ccxcon.apiary.io/
