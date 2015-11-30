@@ -3,6 +3,7 @@ Root URLs for CCX Connector
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from rest_framework_nested import routers
 
@@ -20,3 +21,5 @@ urlpatterns = [
     url(r'^api/v1/', include(modules_router.urls)),
     url(r'^api/v1/user_exists/$', 'courses.views.user_existence', name='user-existence'),
 ]
+
+urlpatterns += staticfiles_urlpatterns()
