@@ -12,12 +12,12 @@ web:
   volumes:
     - .:/src
   environment:
-    DEBUG: True
+    DEBUG: 'True'
     CCXCON_LOG_LEVEL: DEBUG
     DJANGO_LOG_LEVEL: INFO
     PORT: 8077
     DATABASE_URL: postgres://postgres@db:5432/postgres
-    CCXCON_DB_DISABLE_SSL: True
+    CCXCON_DB_DISABLE_SSL: 'True'
     ALLOWED_HOSTS:
     CCXCON_USE_CAS:
     CCXCON_ADMIN_EMAIL:
