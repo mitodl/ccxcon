@@ -2,6 +2,7 @@
 Django Rest Framework Serializers for Course API
 """
 import json
+import logging
 
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
@@ -11,7 +12,6 @@ import six
 
 from .models import Course, Module, EdxAuthor
 
-import logging
 log = logging.getLogger(__name__)
 
 

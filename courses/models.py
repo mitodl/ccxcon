@@ -1,10 +1,11 @@
 """
 Models necessary to represent a course catalog.
 """
+import uuid as pyuuid
+
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from jsonfield import JSONField
-import uuid as pyuuid
 
 
 @python_2_unicode_compatible

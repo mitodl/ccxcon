@@ -21,21 +21,21 @@ class JsonListFieldTests(TestCase):
         Test that empty list string decodes properly
         """
         f = JLF()
-        self.assertEquals([], f.to_internal_value('[]'))
+        self.assertEqual([], f.to_internal_value('[]'))
 
     def test_decodes_unicode(self):
         """
         Test that empty list unicode string decodes properly
         """
         f = JLF()
-        self.assertEquals([], f.to_internal_value(u'[]'))
+        self.assertEqual([], f.to_internal_value(u'[]'))
 
     def test_handles_decoding_nullable_values(self):
         """
         Test that null is decoded to None
         """
         f = JLF()
-        self.assertEquals(None, f.to_internal_value('null'))
+        self.assertEqual(None, f.to_internal_value('null'))
 
     def test_throws_validationerror_on_invalid_json(self):
         """

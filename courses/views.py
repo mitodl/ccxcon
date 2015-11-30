@@ -40,7 +40,7 @@ class ModuleViewSet(viewsets.ModelViewSet):
             'course-detail', args=(kwargs['uuid_uuid'],))
         return super(ModuleViewSet, self).update(request, **kwargs)
 
-    def list(self, request, uuid_uuid, *args, **kwargs):
+    def list(self, request, uuid_uuid):
         "List of modules filtered by parent course."
         modules = self.queryset.filter(course__uuid=uuid_uuid)
         serializer = self.serializer_class(
