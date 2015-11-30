@@ -159,6 +159,7 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
+STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 # Configure e-mail settings
 EMAIL_HOST = get_var('CCXCON_EMAIL_HOST', 'localhost')
