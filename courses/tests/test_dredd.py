@@ -2,8 +2,9 @@
 Test driver for Dredd
 """
 import os
-from six.moves import urllib_parse as urlparse
 import subprocess
+
+from six.moves import urllib_parse as urlparse
 
 from django.conf import settings
 from django.test import LiveServerTestCase
