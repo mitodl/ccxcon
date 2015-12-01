@@ -6,6 +6,11 @@
 
 CCXCon is a simple API serves as an interface between edX running instances and different MIT apps.
 
+At a high level, it takes information from multiple edX backends, and
+produces a single data stream. Going the other way, it takes data
+along this same single data stream and will route it to the correct
+edX backend.
+
 Implements the APIs as described here http://docs.ccxcon.apiary.io/
 
 ## Setup
@@ -17,8 +22,19 @@ pip install docker-compose
 docker-compose up
 ```
 
-From there, you can visit the minimal web-ui at http://localhost:8077/
+From there, you can visit the minimal web-ui at https://localhost:8077/
 
 ## Tests
 
 You can run the dredd API tests via the command `docker-compose up dredd`.
+
+
+## Authorization
+
+To be authorized to make requests to CCXCon, you use OAuth2. OAuth2
+clients can be made in the django-admin. If you're doing
+server-to-server oauth (edX and teachers' portal cases), you'll want
+to create a user representing them, and an oauth app tied to that
+user. The Authorization type should be "Client Credentials". You can
+read more about that in the
+[OAuth2 spec](https://tools.ietf.org/html/rfc6749#section-4.4).

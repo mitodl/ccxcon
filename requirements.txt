@@ -9,3 +9,5 @@ six==1.10.0
 PyYAML==3.11
 newrelic==2.54.0.41
 whitenoise==2.0.6
+django-oauth-toolkit==0.9.0
+django-sslserver==0.16

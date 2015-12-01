@@ -20,6 +20,7 @@ urlpatterns = [
     url(r'^api/v1/', include(router.urls)),
     url(r'^api/v1/', include(modules_router.urls)),
     url(r'^api/v1/user_exists/$', 'courses.views.user_existence', name='user-existence'),
+    url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 ]
 
 urlpatterns += staticfiles_urlpatterns()
