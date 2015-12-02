@@ -96,8 +96,7 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
         model = Course
         fields = (
             'uuid', 'title', 'author_name', 'overview', 'description',
-            'video_url', 'edx_instance', 'price_per_seat_cents', 'url',
-            'modules', 'instructors',
+            'video_url', 'edx_instance', 'url', 'modules', 'instructors',
         )
         extra_kwargs = {
             'url': {'view_name': 'course-detail', 'lookup_field': 'uuid'}
@@ -127,8 +126,7 @@ class ModuleSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:  # pylint: disable=missing-docstring
         model = Module
         fields = (
-            'uuid', 'title', 'subchapters', 'course',
-            'price_per_seat_cents', 'url'
+            'uuid', 'title', 'subchapters', 'course', 'url'
         )
 
     def absolute_url(self, obj):

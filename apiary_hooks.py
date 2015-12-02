@@ -1,6 +1,4 @@
 """Hooks for dredd tests."""
-import json
-
 import django
 import dredd_hooks as hooks  # pylint: disable=import-error
 
@@ -30,27 +28,6 @@ dummyCourse = dict(
 def delete_data(transaction):
     Course.objects.all().delete()
     Module.objects.all().delete()
-
-
-@hooks.before_all
-def make_module_price_nullable(transactions):
-    """
-    Dredd doesn't yet expose nullable number fields,
-    so we patch it in the before_all.
-    """
-    delete_data(None)  # Clean up in case some error from last test is around.
-    for t in transactions:
-        try:
-            schema = json.loads(t['expected']['bodySchema'])
-            # This will throw a key error if this particular transaction
-            # doesn't have an expected request with a `price_per_seat_cents`
-            # field. We should silently ignore that.
-            schema['properties']['price_per_seat_cents']['type'] = [
-                'number', 'null'
-            ]
-            t['expected']['bodySchema'] = json.dumps(schema)
-        except KeyError:
-            pass
 
 
 @hooks.before("Courses > Courses Collection > List All Courses")
