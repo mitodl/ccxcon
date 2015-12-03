@@ -43,13 +43,11 @@ class JsonResponseTests(ApiTests):
             "description": "description1",
             "video_url": "http://youtube.com/1",
             "edx_instance": "edx1",
-            "price_per_seat_cents": 1,
         })
 
         module_dict = {
             "title": "title",
             "subchapters": "['a', 3]",
-            "price_per_seat_cents": 3
         }
         modules_url = reverse('module-list', args=(course.uuid,))
         resp = self.client.post(modules_url, module_dict)

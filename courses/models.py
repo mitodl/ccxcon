@@ -40,10 +40,6 @@ class Course(models.Model):
     edx_instance = models.URLField(max_length=255)
     live = models.BooleanField(default=False)
 
-    price_per_seat_cents = models.IntegerField(
-        null=True, blank=True,
-        help_text="Cost of the whole course per seat in cents")
-
     deleted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, blank=True)
@@ -62,7 +58,6 @@ class Module(models.Model):
     title = models.CharField(max_length=255)
     subchapters = JSONField(default=tuple())  # Array of strings.
     locator_id = models.CharField(max_length=255)
-    price_per_seat_cents = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         return self.title

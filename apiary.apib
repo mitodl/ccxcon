@@ -142,8 +142,7 @@ Deletes a CCX course and all of its components associated with it.
 
             {
               "title": "Introduction to Quantum Bits",
-              "subchapters": ["Quarks and Similar things", "Things that are not quarks"],
-              "price_per_seat_cents": 10000
+              "subchapters": ["Quarks and Similar things", "Things that are not quarks"]
             }
 
 + Response 200 (application/json)
@@ -320,7 +319,6 @@ Deletes the association of a module from a CCX course.
 ## Module (object)
 + uuid: 1140283aa1b24f5e895e97a76a339040 (string)
 + title: Introduction to Quantum Bits (string)
-+ price_per_seat_cents (number, required) - price in cents to avoid poor decimal support
 + subchapters (array[string]): ["Quarks and similar things", "Things that are not quarks"] - list of strings representing chapter pages
 + course: http://localhost:8000/api/v1/coursexs/7e0e52d0386411df81ce001b631bdd31/ (string) - url of the parent course
 + url: /api/v1/coursexs/7e0e52d0386411df81ce001b631bdd31/modules/1140283aa1b24f5e895e97a76a339040/ (string) - url of the module
