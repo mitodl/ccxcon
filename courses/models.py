@@ -47,6 +47,15 @@ class Course(models.Model):
     def __str__(self):
         return self.title
 
+    def to_webhook(self):
+        """
+        Webhook serialization
+        """
+        return {
+            'title': self.title,
+            'external_pk': str(self.uuid),
+        }
+
 
 @python_2_unicode_compatible
 class Module(models.Model):
@@ -61,3 +70,14 @@ class Module(models.Model):
 
     def __str__(self):
         return self.title
+
+    def to_webhook(self):
+        """
+        Webhook serialization
+        """
+        return {
+            'title': self.title,
+            'external_pk': str(self.uuid),
+            'subchapters': self.subchapters,
+            'course_external_pk': self.course.uuid,
+        }

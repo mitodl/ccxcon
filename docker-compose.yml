@@ -2,6 +2,10 @@ db:
   image: postgres
   ports:
     - "5432"
+redis:
+  image: redis
+  ports:
+    - "6379"
 web:
   build: .
   command: >
@@ -28,3 +32,19 @@ web:
     - "8077:8077"
   links:
     - db
+celery:
+  image: ccxcon_web
+  command: >
+    /bin/bash -c '
+    sleep 3;
+    celery -A ccxcon worker -l debug'
+  volumes_from:
+    - web
+  environment:
+    DJANGO_LOG_LEVEL: INFO
+    DATABASE_URL: postgres://postgres@db:5432/postgres
+    BROKER_URL: redis://redis:6379/4
+    CELERY_RESULT_BACKEND: redis://redis:6379/4
+  links:
+    - db
+    - redis
