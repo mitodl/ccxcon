@@ -17,7 +17,7 @@ dummyCourse = dict(
     title="Introductory Physics: Classical Mechanics",
     author_name="David E. Pritchard",
     description="This is the description",
-    video_url="",
+    image_url="http://placehold.it/350x150",
     overview="This is the overview"
 )
 

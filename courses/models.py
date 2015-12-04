@@ -34,7 +34,7 @@ class Course(models.Model):
     author_name = models.CharField(max_length=255)
     overview = models.TextField()
     description = models.TextField()
-    video_url = models.URLField()
+    image_url = models.URLField()
     instructors = models.ManyToManyField(EdxAuthor)
 
     edx_instance = models.URLField(max_length=255)

@@ -96,7 +96,7 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
         model = Course
         fields = (
             'uuid', 'title', 'author_name', 'overview', 'description',
-            'video_url', 'edx_instance', 'url', 'modules', 'instructors',
+            'image_url', 'edx_instance', 'url', 'modules', 'instructors',
         )
         extra_kwargs = {
             'url': {'view_name': 'course-detail', 'lookup_field': 'uuid'}
