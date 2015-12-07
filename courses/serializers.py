@@ -16,6 +16,7 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
     """
     Handles the serialization of Course objects.
     """
+    edx_instance = serializers.CharField(allow_blank=True)
     modules = serializers.SerializerMethodField('module_list')
     instructors = StringyManyToManyField(model=EdxAuthor, lookup="edx_uid")
 
