@@ -6,8 +6,11 @@ dj-database-url==0.3.0
 uwsgi==2.0.11.1
 psycopg2==2.6
 six==1.10.0
+celery==3.1.19
 PyYAML==3.11
 newrelic==2.54.0.41
 whitenoise==2.0.6
 django-oauth-toolkit==0.9.0
 django-sslserver==0.16
+requests==2.8.1
+redis==2.10.5

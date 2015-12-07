@@ -83,7 +83,7 @@ INSTALLED_APPS = (
     'sslserver',
 
     'courses',
-
+    'webhooks',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -245,3 +245,12 @@ LOGGING = {
         }
     },
 }
+
+# Celery
+BROKER_URL = get_var("BROKER_URL", get_var("REDISCLOUD_URL", None))
+CELERY_RESULT_BACKEND = get_var(
+    "CELERY_RESULT_BACKEND", get_var("REDISCLOUD_URL", None)
+)
+CELERY_ALWAYS_EAGER = get_var("CELERY_ALWAYS_EAGER", True)
+CELERY_EAGER_PROPAGATES_EXCEPTIONS = get_var(
+    "CELERY_EAGER_PROPAGATES_EXCEPTIONS", True)
