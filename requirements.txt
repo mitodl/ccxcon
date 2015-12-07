@@ -1,4 +1,4 @@
-Django==1.8.5
+Django==1.9.0
 jsonfield==1.0.3
 djangorestframework==3.3.0
 git+https://github.com/alanjds/drf-nested-routers@8c23e2143be86733e833ff25f88f1fb41a26155f#egg=drf-nested-routers==0.10.0-odl

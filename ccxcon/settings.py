@@ -233,12 +233,7 @@ LOGGING = {
         'django': {
             'propagate': True,
             'level': DJANGO_LOG_LEVEL,
-            'handlers': ['console', 'syslog'],
-        },
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': DJANGO_LOG_LEVEL,
-            'propagate': True,
+            'handlers': ['console', 'syslog', 'mail_admins'],
         },
         'urllib3': {
             'level': 'INFO',
