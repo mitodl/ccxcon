@@ -41,7 +41,7 @@ class JsonResponseTests(ApiTests):
             "author_name": "author1",
             "overview": "overview1",
             "description": "description1",
-            "video_url": "http://youtube.com/1",
+            "image_url": "http://placehold.it/350x150",
             "edx_instance": "edx1",
         })
 
@@ -65,7 +65,7 @@ class JsonResponseTests(ApiTests):
             "author_name": "author1",
             "overview": "overview1",
             "description": "description1",
-            "video_url": "http://youtube.com/1",
+            "image_url": "http://placehold.it/350x150",
             "edx_instance": "http://edx.org/",
             "instructors": [
                 "861e87a0803e436b989cb62d5e672c5f",
