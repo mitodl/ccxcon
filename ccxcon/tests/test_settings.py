@@ -40,7 +40,7 @@ class TestSettings(TestCase):
         with open(temp_config_path, 'w') as temp_config:
             temp_config.write(yaml.dump(config_settings))
 
-        with mock.patch('ccxcon.settings.CONFIG_PATHS') as config_paths:
+        with mock.patch('ccxcon.settings.CONFIG_PATHS', autospec=True) as config_paths:
             config_paths.__iter__.return_value = [temp_config_path]
             fallback_config = load_fallback()
             self.assertDictEqual(fallback_config, config_settings)
