@@ -19,13 +19,20 @@ class ActiveManager(models.Manager):
         return qs.filter(enabled=True)
 
 
+def get_uuid_hex():
+    """
+    Get uuid hex. Required to serialize method in migrations.
+    """
+    return uuid.uuid4().hex
+
+
 @python_2_unicode_compatible
 class Webhook(models.Model):
     """
     Represents possibly outgoing webhooks.
     """
     url = models.URLField()
-    secret = models.CharField(max_length=32, default=lambda: uuid.uuid4().hex)
+    secret = models.CharField(max_length=32, default=get_uuid_hex)
     enabled = models.BooleanField(default=True)
 
     objects = models.Manager()
