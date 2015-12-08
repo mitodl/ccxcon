@@ -26,7 +26,7 @@ From there, you can visit the minimal web-ui at https://localhost:8077/
 
 ## Tests
 
-You can run the dredd API tests via the command `docker-compose up dredd`.
+You can run the tests via the command `docker-compose run web tox`.
 
 
 ## Authorization
