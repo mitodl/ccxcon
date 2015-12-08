@@ -4,7 +4,7 @@ Model tests
 # pylint: disable=no-self-use
 from django.test import TestCase
 
-from webhooks.models import Webhook
+from webhooks.models import Webhook, get_uuid_hex
 from webhooks.factories import WebhookFactory
 
 
@@ -41,3 +41,11 @@ class WebhookModelTests(TestCase):
         webhook = WebhookFactory.build(url=url)
         self.assertEqual(url, "{}".format(webhook))
         self.assertEqual(str, type(webhook.__str__()))
+
+    def test_uuid_helper(self):
+        """
+        Test UUID helper returns something that looks like a uuid and is
+        somewhat random.
+        """
+        assert len(get_uuid_hex()) == 32
+        assert get_uuid_hex() != get_uuid_hex()
