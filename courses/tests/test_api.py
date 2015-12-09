@@ -93,7 +93,7 @@ class UserExistenceTests(ApiTests):
     def test_user_exists(self):
         """If no uid not set, 400"""
         course = CourseFactory.create()
-        author = EdxAuthorFactory.create(edx_uid=str(uuid.uuid4()))
+        author = EdxAuthorFactory.create(edx_uid=str(uuid.uuid4().hex))
         course.instructors.add(author)
         resp = self.client.get(reverse('user-existence'), {'uid': author.edx_uid})
         self.assertEqual(resp.status_code, 200)
