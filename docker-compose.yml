@@ -12,7 +12,7 @@ web:
     /bin/bash -c '
     sleep 3 &&
     python manage.py migrate --noinput &&
-    python manage.py runsslserver 0.0.0.0:8077'
+    python manage.py runsslserver 0.0.0.0:8077 --certificate=cert/fullchain.pem --key=cert/privkey.pem'
   volumes:
     - .:/src
   environment:
