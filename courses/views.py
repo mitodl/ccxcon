@@ -5,6 +5,7 @@ from django.core.urlresolvers import reverse
 
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from .models import Course, Module, EdxAuthor
@@ -18,6 +19,15 @@ class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     lookup_field = 'uuid'
     serializer_class = CourseSerializer
+
+    def create(self, request, *args, **kwargs):
+        """
+        Prepopulate edx_instance based on the requesting user.
+        """
+        if not request.user.info.edx_instance:
+            raise ValidationError("User must have an associated edx_instance")
+        request.data['edx_instance'] = request.user.info.edx_instance
+        return super(CourseViewSet, self).create(request, *args, **kwargs)
 
 
 class ModuleViewSet(viewsets.ModelViewSet):

@@ -1,11 +1,15 @@
 """Hooks for dredd tests."""
+from datetime import datetime, timedelta
+
 import django
 import dredd_hooks as hooks  # pylint: disable=import-error
 
-
 django.setup()
 
+# pylint: disable=ungrouped-imports
 # This import must come after django setup
+from django.contrib.auth.models import User  # noqa
+from oauth2_provider.models import Application, AccessToken  # noqa
 from courses.models import Course, Module  # noqa
 
 
@@ -20,6 +24,25 @@ dummyCourse = dict(
     image_url="http://placehold.it/350x150",
     overview="This is the overview"
 )
+
+
+@hooks.before_all
+def create_user(transactions):
+    """
+    Creates necessary users and makes all requests authenticated.
+    """
+    app = Application.objects.create(
+        name='oauth test app', user=User.objects.create_user('oauthapp'))
+    user = User.objects.create_user('test', password='test')
+    user.info.edx_instance = 'https://edx.org'
+    user.info.save()
+    token = AccessToken.objects.create(
+        user=user, token='test-token', application=app,
+        expires=datetime.now() + timedelta(days=1))
+
+    for t in transactions:
+        t['request']['headers']['Authorization'] = "Bearer {}".format(
+            token.token)
 
 
 # pylint: disable=missing-docstring
