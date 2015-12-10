@@ -1,5 +1,6 @@
-# Set Go as the language so it doesn't download the pip things. Instead, let docker do that.
-language: go
+# Set Ruby as the language so it doesn't download the pip things. Instead, let docker do that.
+language: ruby
+cache: bundler
 script:
   - docker-compose run -e TOX_WORK_DIR=/tmp -e COVERAGE_DIR=/tmp web tox
 services:
