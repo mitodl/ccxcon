@@ -32,9 +32,11 @@ class Course(models.Model):
     """
     uuid = models.UUIDField(default=pyuuid.uuid4, editable=False)
     title = models.CharField(max_length=255)
-    author_name = models.CharField(max_length=255)
-    overview = models.TextField()
-    description = models.TextField()
+    # If course_id lookup is slow, we can hash the contents to do the lookup
+    course_id = models.TextField(help_text="course locator from edx", unique=True)
+    author_name = models.CharField(max_length=255, blank=True, null=True)
+    overview = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
     image_url = models.URLField()
     instructors = models.ManyToManyField(EdxAuthor)
 

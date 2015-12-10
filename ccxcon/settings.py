@@ -250,12 +250,11 @@ CELERY_ALWAYS_EAGER = get_var("CELERY_ALWAYS_EAGER", True)
 CELERY_EAGER_PROPAGATES_EXCEPTIONS = get_var(
     "CELERY_EAGER_PROPAGATES_EXCEPTIONS", True)
 
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-        'oauth2_provider.ext.rest_framework.OAuth2Authentication',
+        'courses.oauth2_auth.OAuth2Authentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',

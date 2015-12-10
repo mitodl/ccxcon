@@ -1,9 +1,11 @@
 """
 Views for powering the Course Catalog API
 """
+from six.moves.urllib import parse
+
 from django.core.urlresolvers import reverse
 
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -22,12 +24,47 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         """
-        Prepopulate edx_instance based on the requesting user.
+        Incoming call from edX.
+
+        Because edX won't know if they've sent the information already or not,
+        this handles the update and create case.
+
+        It also does a bit of data preparation, setting the edx_instance from
+        the authenticated user and prefixing image paths with this
+        edx_instance.
         """
-        if not request.user.info.edx_instance:
-            raise ValidationError("User must have an associated edx_instance")
-        request.data['edx_instance'] = request.user.info.edx_instance
-        return super(CourseViewSet, self).create(request, *args, **kwargs)
+        user = request.user
+        data = request.data.copy()
+        if not user.info.edx_instance:
+            raise ValidationError("User must have an associated edx_instance.")
+        data['edx_instance'] = user.info.edx_instance
+
+        if not data.get('image_url'):
+            raise ValidationError("You must specify an image_url")
+        data['image_url'] = parse.urljoin(
+            user.info.edx_instance, data['image_url'])
+
+        # These two if blocks are majoritively copied directly from the source's
+        # underlying mixins. It allows us to overwrite how we get the instance
+        # to update without making a complex `get_object` override. Beyond that,
+        # it allows us to not mutate the request.data object.
+        if Course.objects.filter(course_id=data['course_id']).exists():
+            # Mostly duped from rest_framework.mixins.UpdateModelMixin
+            partial = kwargs.pop('partial', False)
+            instance = Course.objects.get(course_id=data['course_id'])
+            serializer = self.get_serializer(
+                instance, data=data, partial=partial)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            return Response(serializer.data)
+        else:
+            # Duped from rest_framework.mixins.CreateModelMixin for clarity.
+            serializer = self.get_serializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(
+                serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class ModuleViewSet(viewsets.ModelViewSet):

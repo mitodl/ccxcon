@@ -4,8 +4,10 @@ Signal tests
 # pylint: disable=no-self-use
 import mock
 
+from django.contrib.auth.models import User
 from django.test import TestCase
 
+from courses.models import UserInfo
 from courses.factories import CourseFactory, ModuleFactory
 
 
@@ -39,3 +41,27 @@ class PublishOnUpdateTests(TestCase):
             assert args[0] == 'courses.Module'
             assert args[1] == 'uuid'
             assert args[2] == module.uuid
+
+
+class CreateProfileTests(TestCase):
+    """
+    Tests for the user profile creation signal.
+    """
+
+    def test_creating_user_creates_profile(self):
+        """
+        We should get a profile after making a user.
+        """
+        assert not UserInfo.objects.exists()
+        User.objects.create_user('test')
+        assert UserInfo.objects.count() == 1
+
+    def test_saving_existing_user_doesnt_create_profile(self):
+        """
+        We shouldn't get two profiles after updating.
+        """
+        user = User.objects.create_user('test')
+        assert UserInfo.objects.count() == 1
+        user.username = 'foo'
+        user.save()
+        assert UserInfo.objects.count() == 1

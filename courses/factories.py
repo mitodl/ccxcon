@@ -26,6 +26,7 @@ class CourseFactory(DjangoModelFactory):
     edx_instance = "https://edx.org/"
     overview = factory.LazyAttribute(lambda x: fake.text())
     description = factory.LazyAttribute(lambda x: fake.text())
+    course_id = fuzzy.FuzzyText(length=30)
 
     class Meta:  # pylint: disable=missing-docstring
         model = Course
