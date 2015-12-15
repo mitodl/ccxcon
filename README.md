@@ -22,7 +22,9 @@ pip install docker-compose
 docker-compose up
 ```
 
-From there, you can visit the minimal web-ui at https://localhost:8077/
+From there, you can visit the minimal web-ui at
+https://localhost.daplie.com:8077/ (which proxies back to localhost,
+but has valid certificates).
 
 ## Tests
 
