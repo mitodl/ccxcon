@@ -14,3 +14,4 @@ django-oauth-toolkit==0.9.0
 django-sslserver==0.18
 requests==2.8.1
 redis==2.10.5
+fake-factory==0.5.3
