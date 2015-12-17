@@ -7,6 +7,8 @@ omit =
     apiary_hooks.py
     manage.py
     ./.tox/*
+    */migrations/*
+    *_test.py
 
 [report]
 exclude_lines =

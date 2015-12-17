@@ -31,13 +31,16 @@ def create_user(transactions):
     """
     Creates necessary users and makes all requests authenticated.
     """
+    app_user = User.objects.create_user('oauthapp')
     app = Application.objects.create(
-        name='oauth test app', user=User.objects.create_user('oauthapp'))
-    user = User.objects.create_user('test', password='test')
-    user.info.edx_instance = 'https://edx.org'
-    user.info.save()
+        name='oauth test app', user=app_user)
+    app_user.info.edx_instance = 'https://edx.org'
+    app_user.info.save()
+
+    # Explicitly not setting user on the AccessToken, as we don't do this in the
+    # actual token generation code.
     token = AccessToken.objects.create(
-        user=user, token='test-token', application=app,
+        token='test-token', application=app,
         expires=datetime.now() + timedelta(days=1))
 
     for t in transactions:

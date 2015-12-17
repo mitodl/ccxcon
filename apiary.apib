@@ -25,7 +25,8 @@ CCXCon is a simple API serves as an interface between edX running instances and 
           "overview": "This is the course overview.",
           "description": "This is a college level Introductory Newtonian Mechanics",
           "image_url": "http://placehold.it/350x150",
-          "instructors": ["2d133482b3214a119f55c3060d882ceb"]
+          "instructors": ["2d133482b3214a119f55c3060d882ceb"],
+          "course_id": "course-locator:$org+$course.$run+branch+$branch+version+$version+type"
         }
 
 + Response 201 (application/json)
@@ -74,7 +75,8 @@ Deletes a course and all of its components and CCXs associated with it.
           "overview": "This is the course overview.",
           "description": "This is a college level Introductory Newtonian Mechanics",
           "image_url": "http://placehold.it/350x150",
-          "instructors": ["2d133482b3214a119f55c3060d882ceb"]
+          "instructors": ["2d133482b3214a119f55c3060d882ceb"],
+          "course_id": "course-locator:$org+$course.$run+branch+$branch+version+$version+type"
         }
 
 + Response 200 (application/json)
@@ -308,6 +310,7 @@ Deletes the association of a module from a CCX course.
 ## Course (object)
 + uuid (string)
 + title: Introductory Physics: Classical Mechanics (string)
++ course_id: course-locator:$org+$course.$run+branch+$branch+version+$version+type (string)
 + author: David E. Pritchard (string)
 + image_url (string)
 + terms_url (string)

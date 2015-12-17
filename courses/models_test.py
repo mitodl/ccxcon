@@ -2,8 +2,10 @@
 Tests for Models
 """
 from django.test import TestCase
+from django.contrib.auth.models import User
 
-from courses.models import Course, Module
+from courses.models import Course, Module, UserInfo
+# pylint: disable=no-self-use
 
 
 class CourseTests(TestCase):
@@ -14,7 +16,7 @@ class CourseTests(TestCase):
         """
         Test behavior of str(Course)
         """
-        self.assertEqual(str(Course(title='test')), 'test')
+        assert str(Course(title='test')) == 'test'
 
 
 class ModuleTests(TestCase):
@@ -25,4 +27,15 @@ class ModuleTests(TestCase):
         """
         Test behavior of str(Module)
         """
-        self.assertEqual(str(Module(title='test')), 'test')
+        assert str(Module(title='test')) == 'test'
+
+
+class UserInfoTests(TestCase):
+    """
+    Tests for UserInfo
+    """
+    def test_tostring(self):
+        """
+        Test behavior of str(UserInfo)
+        """
+        assert str(UserInfo(user=User(username='test'))) == 'Profile for test'
