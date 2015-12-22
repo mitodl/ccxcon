@@ -69,6 +69,11 @@
         "SECRET_KEY": {
             "description": "Django secret key.",
             "generator": "secret"
+        },
+        "CCXCON_SECURE_SSL_REDIRECT": {
+            "description": "Application-level SSL recirect setting.",
+	    "required": false,
+	    "value": "True"
         }
     }
 }
