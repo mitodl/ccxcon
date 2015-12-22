@@ -67,6 +67,9 @@ DEBUG = get_var('DEBUG', False)
 
 ALLOWED_HOSTS = get_var('ALLOWED_HOSTS', [])
 
+# SECURITY WARNING: Always turn on SSL redirect in production
+SECURE_SSL_REDIRECT = get_var('CCXCON_SECURE_SSL_REDIRECT', True)
+
 
 # Application definition
 
