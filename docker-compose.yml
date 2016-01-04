@@ -28,7 +28,7 @@ web:
     CCXCON_CAS_URL:
     TOX_WORK_DIR: .tox
     COVERAGE_DIR: htmlcov
-    CCXCON_SECURE_SSL_REDIRECT: False
+    CCXCON_SECURE_SSL_REDIRECT: 'False'
   ports:
     - "8077:8077"
   links:
