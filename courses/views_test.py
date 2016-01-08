@@ -5,9 +5,11 @@ import uuid
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+import mock
 
 from courses.factories import CourseFactory, ModuleFactory, EdxAuthorFactory
 from courses.models import EdxAuthor, Course
+from oauth_mgmt.factories import BackingInstanceFactory
 
 
 COURSE_ID = "course-locator:$org+$course.$run+branch+$branch+version+$version+type"
@@ -17,7 +19,7 @@ class ApiTests(TestCase):
     """Tests regarding REST API"""
     def setUp(self):
         self.user = User.objects.create_user('test', password='test')
-        self.user.info.edx_instance = 'https://edx.org'
+        self.user.info.edx_instance = BackingInstanceFactory.create(instance_url='https://edx.org')
         self.user.info.save()
         assert self.client.login(username='test', password='test')
 
@@ -52,7 +54,6 @@ class JsonResponseTests(ApiTests):
             "course_id": COURSE_ID,
             "description": "description1",
             "image_url": "http://placehold.it/350x150",
-            "edx_instance": "edx1",
         })
 
         module_dict = {
@@ -60,7 +61,8 @@ class JsonResponseTests(ApiTests):
             "subchapters": "['a', 3]",
         }
         modules_url = reverse('module-list', args=(course.uuid,))
-        resp = self.client.post(modules_url, module_dict)
+        with mock.patch('courses.views.module_population', autospec=True):
+            resp = self.client.post(modules_url, module_dict)
         self.assertEqual(resp.status_code, 400)  # Invalid JSON
 
         resp = self.client.get(modules_url)
@@ -70,41 +72,63 @@ class JsonResponseTests(ApiTests):
         """
         Validate course create endpoint accepts instructors
         """
-        resp = self.client.post(reverse('course-list'), {
-            "title": "title1",
-            "author_name": "author1",
-            "overview": "overview1",
-            "description": "description1",
-            "image_url": "http://placehold.it/350x150",
-            "course_id": COURSE_ID,
-            "edx_instance": "http://edx.org/",
-            "instructors": [
-                "861e87a0803e436b989cb62d5e672c5f",
-                "961e87a0803e436b989cb62d5e672c5f"
-            ]
-        })
+        with mock.patch('courses.views.module_population', autospec=True):
+            resp = self.client.post(reverse('course-list'), {
+                "title": "title1",
+                "author_name": "author1",
+                "overview": "overview1",
+                "description": "description1",
+                "image_url": "http://placehold.it/350x150",
+                "course_id": COURSE_ID,
+                "edx_instance": "http://edx.org/",
+                "instructors": [
+                    "861e87a0803e436b989cb62d5e672c5f",
+                    "961e87a0803e436b989cb62d5e672c5f"
+                ]
+            })
         self.assertEqual(resp.status_code, 201, msg=resp.content)
         assert EdxAuthor.objects.count() == 2
+
+    def test_create_course_does_module_population(self):
+        """
+        Ensure we actually call out to module population code.
+        """
+        with mock.patch('courses.views.module_population', autospec=True) as mock_pop:
+            self.client.post(reverse('course-list'), {
+                "title": "title1",
+                "author_name": "author1",
+                "overview": "overview1",
+                "description": "description1",
+                "image_url": "http://placehold.it/350x150",
+                "course_id": COURSE_ID,
+                "edx_instance": "http://edx.org/",
+                "instructors": [
+                    "861e87a0803e436b989cb62d5e672c5f",
+                    "961e87a0803e436b989cb62d5e672c5f"
+                ]
+            })
+            assert mock_pop.delay.called
 
     def test_edx_instance_applied_automatically(self):
         """
         edx_instance applied automatically.
         """
-        resp = self.client.post(reverse('course-list'), {
-            "title": "title1",
-            "author_name": "author1",
-            "overview": "overview1",
-            "description": "description1",
-            "image_url": "http://youtube.com/1",
-            "course_id": COURSE_ID,
-            "edx_instance": "",
-            "instructors": [
-                "861e87a0803e436b989cb62d5e672c5f",
-                "961e87a0803e436b989cb62d5e672c5f"
-            ]
-        })
+        with mock.patch('courses.views.module_population', autospec=True):
+            resp = self.client.post(reverse('course-list'), {
+                "title": "title1",
+                "author_name": "author1",
+                "overview": "overview1",
+                "description": "description1",
+                "image_url": "http://youtube.com/1",
+                "course_id": COURSE_ID,
+                "edx_instance": "",
+                "instructors": [
+                    "861e87a0803e436b989cb62d5e672c5f",
+                    "961e87a0803e436b989cb62d5e672c5f"
+                ]
+            })
         self.assertEqual(resp.status_code, 201, msg=resp.content)
-        assert Course.objects.all()[0].edx_instance == 'https://edx.org'
+        assert Course.objects.all()[0].edx_instance.instance_url == 'https://edx.org'
 
     def test_requires_edx_instance(self):
         """
@@ -112,37 +136,39 @@ class JsonResponseTests(ApiTests):
         """
         User.objects.create_user('no-instance', password='test')
         assert self.client.login(username='no-instance', password='test')
-        resp = self.client.post(reverse('course-list'), {
-            "title": "title1",
-            "author_name": "author1",
-            "overview": "overview1",
-            "description": "description1",
-            "image_url": "http://youtube.com/1",
-            "course_id": COURSE_ID,
-            "edx_instance": "",
-            "instructors": [
-                "861e87a0803e436b989cb62d5e672c5f",
-                "961e87a0803e436b989cb62d5e672c5f"
-            ]
-        })
+        with mock.patch('courses.views.module_population', autospec=True):
+            resp = self.client.post(reverse('course-list'), {
+                "title": "title1",
+                "author_name": "author1",
+                "overview": "overview1",
+                "description": "description1",
+                "image_url": "http://youtube.com/1",
+                "course_id": COURSE_ID,
+                "edx_instance": "",
+                "instructors": [
+                    "861e87a0803e436b989cb62d5e672c5f",
+                    "961e87a0803e436b989cb62d5e672c5f"
+                ]
+            })
         self.assertEqual(resp.status_code, 400, resp.content)
 
     def test_image_url_as_path_is_okay(self):
         """
         image_urls can be just paths.
         """
-        resp = self.client.post(reverse('course-list'), {
-            "title": "title1",
-            "author_name": "author1",
-            "overview": "overview1",
-            "description": "description1",
-            "course_id": COURSE_ID,
-            "image_url": "/1",
-            "instructors": [
-                "861e87a0803e436b989cb62d5e672c5f",
-                "961e87a0803e436b989cb62d5e672c5f"
-            ]
-        })
+        with mock.patch('courses.views.module_population', autospec=True):
+            resp = self.client.post(reverse('course-list'), {
+                "title": "title1",
+                "author_name": "author1",
+                "overview": "overview1",
+                "description": "description1",
+                "course_id": COURSE_ID,
+                "image_url": "/1",
+                "instructors": [
+                    "861e87a0803e436b989cb62d5e672c5f",
+                    "961e87a0803e436b989cb62d5e672c5f"
+                ]
+            })
         self.assertEqual(resp.status_code, 201, resp.content)
         assert Course.objects.all()[0].image_url == "{}/1".format(
             self.user.info.edx_instance)
@@ -151,17 +177,18 @@ class JsonResponseTests(ApiTests):
         """
         image_urls are still required
         """
-        resp = self.client.post(reverse('course-list'), {
-            "title": "title1",
-            "author_name": "author1",
-            "overview": "overview1",
-            "description": "description1",
-            "course_id": COURSE_ID,
-            "instructors": [
-                "861e87a0803e436b989cb62d5e672c5f",
-                "961e87a0803e436b989cb62d5e672c5f"
-            ]
-        })
+        with mock.patch('courses.views.module_population', autospec=True):
+            resp = self.client.post(reverse('course-list'), {
+                "title": "title1",
+                "author_name": "author1",
+                "overview": "overview1",
+                "description": "description1",
+                "course_id": COURSE_ID,
+                "instructors": [
+                    "861e87a0803e436b989cb62d5e672c5f",
+                    "961e87a0803e436b989cb62d5e672c5f"
+                ]
+            })
         self.assertEqual(resp.status_code, 400, resp.content)
         assert 'must specify an image_url' in str(resp.content)
 
@@ -169,18 +196,19 @@ class JsonResponseTests(ApiTests):
         """
         image_urls are still required even if blank
         """
-        resp = self.client.post(reverse('course-list'), {
-            "title": "title1",
-            "author_name": "author1",
-            "overview": "overview1",
-            "description": "description1",
-            "image_url": "",
-            "course_id": COURSE_ID,
-            "instructors": [
-                "861e87a0803e436b989cb62d5e672c5f",
-                "961e87a0803e436b989cb62d5e672c5f"
-            ]
-        })
+        with mock.patch('courses.views.module_population', autospec=True):
+            resp = self.client.post(reverse('course-list'), {
+                "title": "title1",
+                "author_name": "author1",
+                "overview": "overview1",
+                "description": "description1",
+                "image_url": "",
+                "course_id": COURSE_ID,
+                "instructors": [
+                    "861e87a0803e436b989cb62d5e672c5f",
+                    "961e87a0803e436b989cb62d5e672c5f"
+                ]
+            })
         self.assertEqual(resp.status_code, 400, resp.content)
         assert 'must specify an image_url' in str(resp.content)
 
@@ -188,33 +216,34 @@ class JsonResponseTests(ApiTests):
         """
         If we post twice with the same course_id, it should trigger an update.
         """
-        resp = self.client.post(reverse('course-list'), {
-            "title": "title1",
-            "author_name": "author1",
-            "overview": "overview1",
-            "description": "description1",
-            "course_id": COURSE_ID,
-            "image_url": "/234.jpg",
-            "instructors": [
-                "861e87a0803e436b989cb62d5e672c5f",
-                "961e87a0803e436b989cb62d5e672c5f"
-            ]
-        })
-        self.assertEqual(resp.status_code, 201, resp.content)
-        resp = self.client.post(reverse('course-list'), {
-            "title": "title1",
-            "author_name": "author1",
-            "overview": "overview1",
-            "description": "description1",
-            "course_id": COURSE_ID,
-            "image_url": "/234.jpg",
-            "instructors": [
-                "861e87a0803e436b989cb62d5e672c5f",
-                "961e87a0803e436b989cb62d5e672c5f"
-            ]
-        })
-        self.assertEqual(resp.status_code, 200, resp.content)
-        assert Course.objects.count() == 1
+        with mock.patch('courses.views.module_population', autospec=True):
+            resp = self.client.post(reverse('course-list'), {
+                "title": "title1",
+                "author_name": "author1",
+                "overview": "overview1",
+                "description": "description1",
+                "course_id": COURSE_ID,
+                "image_url": "/234.jpg",
+                "instructors": [
+                    "861e87a0803e436b989cb62d5e672c5f",
+                    "961e87a0803e436b989cb62d5e672c5f"
+                ]
+            })
+            self.assertEqual(resp.status_code, 201, resp.content)
+            resp = self.client.post(reverse('course-list'), {
+                "title": "title1",
+                "author_name": "author1",
+                "overview": "overview1",
+                "description": "description1",
+                "course_id": COURSE_ID,
+                "image_url": "/234.jpg",
+                "instructors": [
+                    "861e87a0803e436b989cb62d5e672c5f",
+                    "961e87a0803e436b989cb62d5e672c5f"
+                ]
+            })
+            self.assertEqual(resp.status_code, 200, resp.content)
+            assert Course.objects.count() == 1
 
 
 class UserExistenceTests(ApiTests):

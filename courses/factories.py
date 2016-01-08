@@ -7,6 +7,7 @@ from factory.django import DjangoModelFactory
 import faker
 
 from .models import Module, Course, EdxAuthor
+from oauth_mgmt.factories import BackingInstanceFactory
 
 fake = faker.Factory.create()
 
@@ -23,7 +24,7 @@ class CourseFactory(DjangoModelFactory):
     """Factory for Course"""
     title = fuzzy.FuzzyText(prefix="Course ")
     author_name = factory.LazyAttribute(lambda x: fake.name())
-    edx_instance = "https://edx.org/"
+    edx_instance = factory.SubFactory(BackingInstanceFactory)
     overview = factory.LazyAttribute(lambda x: fake.text())
     description = factory.LazyAttribute(lambda x: fake.text())
     course_id = fuzzy.FuzzyText(length=30)
