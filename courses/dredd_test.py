@@ -4,14 +4,22 @@ Test driver for Dredd
 import os
 import subprocess
 
+import pytest
 from six.moves import urllib_parse as urlparse
 
 from django.conf import settings
 from django.test import LiveServerTestCase
+from django.test.utils import override_settings
 
 
+@pytest.mark.slowtest
 class DreddTestCase(LiveServerTestCase):
     """Tests Dredd related tests."""
+
+    # We don't have backing edx instances, so the 'fetch module list' tasks will
+    # fail. To prevent this from failing the test case, tell celery to ignore
+    # exceptions in eagerly executed tasks.
+    @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=False)
     def test_dredd(self):
         """
         Run test via Dredd.

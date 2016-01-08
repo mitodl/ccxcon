@@ -87,6 +87,7 @@ INSTALLED_APPS = (
 
     'courses',
     'webhooks',
+    'oauth_mgmt',
 )
 
 MIDDLEWARE_CLASSES = (

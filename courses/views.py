@@ -12,6 +12,7 @@ from rest_framework.response import Response
 
 from .models import Course, Module, EdxAuthor
 from .serializers import CourseSerializer, ModuleSerializer
+from .tasks import module_population
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -42,7 +43,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         if not data.get('image_url'):
             raise ValidationError("You must specify an image_url")
         data['image_url'] = parse.urljoin(
-            user.info.edx_instance, data['image_url'])
+            user.info.edx_instance.instance_url, data['image_url'])
 
         # These two if blocks are majoritively copied directly from the source's
         # underlying mixins. It allows us to overwrite how we get the instance
@@ -56,12 +57,14 @@ class CourseViewSet(viewsets.ModelViewSet):
                 instance, data=data, partial=partial)
             serializer.is_valid(raise_exception=True)
             self.perform_update(serializer)
+            module_population.delay(serializer.instance.course_id)
             return Response(serializer.data)
         else:
             # Duped from rest_framework.mixins.CreateModelMixin for clarity.
             serializer = self.get_serializer(data=data)
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
+            module_population.delay(serializer.instance.course_id)
             headers = self.get_success_headers(serializer.data)
             return Response(
                 serializer.data, status=status.HTTP_201_CREATED, headers=headers)

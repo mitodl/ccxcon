@@ -10,6 +10,9 @@ django.setup()
 # This import must come after django setup
 from django.contrib.auth.models import User  # noqa
 from oauth2_provider.models import Application, AccessToken  # noqa
+from oauth_mgmt.factories import BackingInstanceFactory  # noqa
+from oauth_mgmt.models import BackingInstance  # noqa
+from courses.factories import CourseFactory  # noqa
 from courses.models import Course, Module  # noqa
 
 
@@ -22,7 +25,7 @@ dummyCourse = dict(
     author_name="David E. Pritchard",
     description="This is the description",
     image_url="http://placehold.it/350x150",
-    overview="This is the overview"
+    overview="This is the overview",
 )
 
 
@@ -34,7 +37,7 @@ def create_user(transactions):
     app_user = User.objects.create_user('oauthapp')
     app = Application.objects.create(
         name='oauth test app', user=app_user)
-    app_user.info.edx_instance = 'https://edx.org'
+    app_user.info.edx_instance = BackingInstanceFactory.create(instance_url='https://edx.org')
     app_user.info.save()
 
     # Explicitly not setting user on the AccessToken, as we don't do this in the
@@ -48,8 +51,17 @@ def create_user(transactions):
             token.token)
 
 
-# pylint: disable=missing-docstring
-# pylint: disable=unused-argument
+def gen_course(**kwargs):
+    """
+    Generate a course using dummyCourse info, proxying back to the CourseFactory.
+    """
+    attrs = dummyCourse.copy()
+    attrs.update(edx_instance=BackingInstance.objects.get(instance_url='https://edx.org'))
+    attrs.update(kwargs)
+    return CourseFactory.create(**attrs)
+
+
+# pylint: disable=missing-docstring,unused-argument
 @hooks.after_each
 def delete_data(transaction):
     Course.objects.all().delete()
@@ -58,17 +70,17 @@ def delete_data(transaction):
 
 @hooks.before("Courses > Courses Collection > List All Courses")
 def course_list(transaction):
-    Course(**dummyCourse).save()
+    gen_course()
 
 
 @hooks.before("Courses > Course > Retrieve a Course")
 def course_get(transaction):
-    Course(**dummyCourse).save()
+    gen_course()
 
 
 @hooks.before("Courses > Course > Delete Course")
 def course_delete(transaction):
-    Course(**dummyCourse).save()
+    gen_course()
 
 
 @hooks.before("Courses > Course > Partially update Course")
@@ -78,29 +90,29 @@ def course_partial_update(transaction):
 
 @hooks.before("Courses > Course > Update Course")
 def course_update(transaction):
-    Course.objects.create(uuid=COURSE_UUID)
+    gen_course(uuid=COURSE_UUID)
 
 
 @hooks.before(
     "Modules > Modules collection > List All modules  for a given Course")
 def module_list(transaction):
-    Course.objects.create(uuid=COURSE_UUID)
+    gen_course(uuid=COURSE_UUID)
 
 
 @hooks.before("Modules > Modules collection > Create a New Module")
 def module_create(transaction):
-    Course.objects.create(uuid=COURSE_UUID)
+    gen_course(uuid=COURSE_UUID)
 
 
 @hooks.before("Modules > Module > Retrieve a Module")
 def module_get(transaction):
-    course = Course.objects.create(uuid=COURSE_UUID)
+    course = gen_course(uuid=COURSE_UUID)
     Module.objects.create(uuid=MODULE_UUID, course=course)
 
 
 @hooks.before("Modules > Module > Delete a Module")
 def module_delete(transaction):
-    course = Course.objects.create(uuid=COURSE_UUID)
+    course = gen_course(uuid=COURSE_UUID)
     Module.objects.create(uuid=MODULE_UUID, course=course)
 
 
@@ -111,7 +123,7 @@ def module_partial_update(transaction):
 
 @hooks.before("Modules > Module > Update a Module")
 def module_update(transaction):
-    course = Course.objects.create(uuid=COURSE_UUID)
+    course = gen_course(uuid=COURSE_UUID)
     Module.objects.create(uuid=MODULE_UUID, course=course)
 
 
