@@ -28,7 +28,7 @@ class PublishOnUpdateTests(TestCase):
             args, _ = wh_mock.delay.call_args
             assert args[0] == 'courses.Course'
             assert args[1] == 'uuid'
-            assert args[2] == course.uuid
+            assert args[2] == str(course.uuid)
 
     def test_module_save_publishes(self):
         """
@@ -42,7 +42,7 @@ class PublishOnUpdateTests(TestCase):
             args, _ = wh_mock.delay.call_args
             assert args[0] == 'courses.Module'
             assert args[1] == 'uuid'
-            assert args[2] == module.uuid
+            assert args[2] == str(module.uuid)
 
 
 class CreateProfileTests(TestCase):

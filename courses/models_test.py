@@ -1,6 +1,7 @@
 """
 Tests for Models
 """
+import json
 from django.test import TestCase
 from django.contrib.auth.models import User
 
@@ -18,6 +19,16 @@ class CourseTests(TestCase):
         Test behavior of str(Course)
         """
         assert str(Course(title='test')) == 'test'
+
+    def test_towebhook(self):
+        """
+        test to_webhook implementation returns valid json object
+        """
+        course = CourseFactory.build()
+        json.dumps(course.to_webhook())
+        ex_pk = course.to_webhook()['external_pk']
+        assert isinstance(ex_pk, str)
+        assert '-' in ex_pk
 
 
 class ModuleTests(TestCase):
@@ -46,6 +57,17 @@ class ModuleTests(TestCase):
         result = [x.id for x in Module.objects.all()]
 
         assert result == [m10.id, m11.id, m20.id, m21.id]
+
+    def test_towebhook(self):
+        """
+        test to_webhook implementation returns valid json object
+        """
+        module = ModuleFactory.build()
+        web_out = module.to_webhook()
+        json.dumps(web_out)
+        for k in ('external_pk', 'course_external_pk'):
+            assert isinstance(web_out[k], str)
+            assert '-' in web_out[k]
 
 
 class UserInfoTests(TestCase):

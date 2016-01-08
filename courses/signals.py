@@ -19,7 +19,7 @@ def publish_on_update(sender, instance, **kwargs):
     publish_webhook.delay(
         '{}.{}'.format(instance._meta.app_label,
                        instance._meta.object_name),
-        'uuid', instance.uuid)
+        'uuid', str(instance.uuid))
 
 
 @receiver(post_save, sender=User)

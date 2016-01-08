@@ -18,6 +18,7 @@ from .models import Course, Module, EdxAuthor
 from .serializers import CourseSerializer, ModuleSerializer
 from .tasks import module_population
 
+
 log = logging.getLogger(__name__)
 
 
@@ -163,7 +164,7 @@ def create_ccx(request):
         return upstream_error(resp.content)
 
     log.info(
-        'Created ccx course for user {email} on master course {course_id}. Response: {response}',
-        email=user_email, course_id=master_course_id, response=resp.content)
+        'Created ccx course for user %s on master course %s. Response: %s',
+        user_email, master_course_id, resp.content)
 
     return Response(status=201)

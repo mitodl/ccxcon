@@ -234,6 +234,18 @@ LOGGING = {
             'handlers': ['console', 'syslog'],
             'level': LOG_LEVEL,
         },
+        'webhooks': {
+            'handlers': ['console', 'syslog'],
+            'level': LOG_LEVEL,
+        },
+        'courses': {
+            'handlers': ['console', 'syslog'],
+            'level': LOG_LEVEL,
+        },
+        'oauth_mgmt': {
+            'handlers': ['console', 'syslog'],
+            'level': LOG_LEVEL,
+        },
         'django': {
             'propagate': True,
             'level': DJANGO_LOG_LEVEL,

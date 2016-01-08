@@ -1,4 +1,5 @@
 """Hooks for dredd tests."""
+from uuid import UUID
 from datetime import datetime, timedelta
 
 import django
@@ -16,8 +17,8 @@ from courses.factories import CourseFactory  # noqa
 from courses.models import Course, Module  # noqa
 
 
-COURSE_UUID = '7e0e52d0386411df81ce001b631bdd31'
-MODULE_UUID = '1db1a8439cbf4a8f8c395ad63fb43e8a'
+COURSE_UUID = UUID(hex='7e0e52d0386411df81ce001b631bdd31')
+MODULE_UUID = UUID(hex='1db1a8439cbf4a8f8c395ad63fb43e8a')
 
 dummyCourse = dict(
     uuid=COURSE_UUID,

@@ -48,7 +48,8 @@ class PublishWebhookTests(TestCase):
             publish_webhook('courses.Course', 'pk', course.pk)
             assert mock_requests.post.call_count == 1
             _, kwargs = mock_requests.post.call_args
-            payload = json.loads(kwargs['json'])
+            payload = kwargs['json']
+            assert isinstance(payload, dict)
             assert payload['action'] == 'update'
 
     def test_no_post_if_no_webhook_method(self):
@@ -70,8 +71,7 @@ class PublishWebhookTests(TestCase):
             publish_webhook('courses.Course', 'pk', 1)
             assert mock_requests.post.call_count == 1
             _, kwargs = mock_requests.post.call_args
-            payload = json.loads(kwargs['json'])
-            assert payload['action'] == 'delete'
+            assert kwargs['json']['action'] == 'delete'
 
     def test_secure_header_verification(self):
         """
@@ -83,14 +83,13 @@ class PublishWebhookTests(TestCase):
             publish_webhook('courses.Course', 'pk', course.pk)
             assert mock_requests.post.call_count == 1
             _, kwargs = mock_requests.post.call_args
-            payload = json.loads(kwargs['json'])
-            assert payload['action'] == 'update'
+            assert kwargs['json']['action'] == 'update'
 
             # This constant_time_compare is important for implementations to
             # ensure they're not vulnerable to timing attacks.
             assert constant_time_compare(
                 kwargs['headers']['X-CCXCon-Signature'], hmac.new(
-                    force_bytes(wh.secret), force_bytes(kwargs['json']),
+                    force_bytes(wh.secret), force_bytes(json.dumps(kwargs['json'])),
                     hashlib.sha1).hexdigest())
 
     def test_one_post_of_many_failing(self):

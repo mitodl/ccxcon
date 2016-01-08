@@ -86,7 +86,7 @@ class Module(models.Model):
             'title': self.title,
             'external_pk': str(self.uuid),
             'subchapters': self.subchapters,
-            'course_external_pk': self.course.uuid,
+            'course_external_pk': str(self.course.uuid),
         }
 
 
