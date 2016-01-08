@@ -81,7 +81,9 @@ def publish_webhook(model_str, lookup_field, lookup_value):
             j_payload = json.dumps(payload)
             signature = hmac.new(force_bytes(wh.secret), force_bytes(j_payload),
                                  hashlib.sha1).hexdigest()
-            requests.post(wh.url, json=j_payload, headers={
+            log.debug("Posting payload with signature %s. Payload: %s", signature, j_payload)
+            # NOTE: Using the non-stringy version, given we're posting this as json.
+            requests.post(wh.url, json=payload, headers={
                 'X-CCXCon-Signature': signature
             })
         except RequestException as e:
