@@ -9,6 +9,7 @@ import faker
 from .models import Module, Course, EdxAuthor
 from oauth_mgmt.factories import BackingInstanceFactory
 
+
 fake = faker.Factory.create()
 
 
