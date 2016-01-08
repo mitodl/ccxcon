@@ -1,16 +1,17 @@
 """Tests regarding REST API"""
 import json
+import re
 import uuid
 
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 import mock
+from requests.exceptions import RequestException
 
 from courses.factories import CourseFactory, ModuleFactory, EdxAuthorFactory
 from courses.models import EdxAuthor, Course
 from oauth_mgmt.factories import BackingInstanceFactory
-
 
 COURSE_ID = "course-locator:$org+$course.$run+branch+$branch+version+$version+type"
 
@@ -190,7 +191,7 @@ class JsonResponseTests(ApiTests):
                 ]
             })
         self.assertEqual(resp.status_code, 400, resp.content)
-        assert 'must specify an image_url' in str(resp.content)
+        assert 'must specify an image_url' in resp.content.decode('utf-8')
 
     def test_image_url_required_when_blank(self):
         """
@@ -210,7 +211,7 @@ class JsonResponseTests(ApiTests):
                 ]
             })
         self.assertEqual(resp.status_code, 400, resp.content)
-        assert 'must specify an image_url' in str(resp.content)
+        assert 'must specify an image_url' in resp.content.decode('utf-8')
 
     def test_duplicate_post_doesnt_create(self):
         """
@@ -268,3 +269,78 @@ class UserExistenceTests(ApiTests):
         resp = self.client.get(reverse('user-existence'), {'uid': author.edx_uid})
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(json.loads(resp.content.decode('utf-8')), {'exists': True})
+
+
+# pylint: disable=no-self-use
+class CCXCreateTests(ApiTests):
+    """Test CCX create API for making CCXs on edx"""
+
+    def setUp(self):
+        self.payload = {
+            'master_course_id': 'foo',
+            'user_email': 'bleh@example.com',
+            'total_seats': 102,
+            'display_name': 'test name',
+        }
+        super(CCXCreateTests, self).setUp()
+
+    def test_missing_arguments_throw_error(self):
+        """Throw an error if we're missing a POST parameter"""
+        for key in ['master_course_id', 'user_email', 'total_seats', 'display_name']:
+            payload = self.payload.copy()
+            del payload[key]
+
+            result = self.client.post(reverse('create-ccx'), payload)
+
+            assert result.status_code == 400, result.content.decode('utf-8')
+            assert re.search('POST argument.*{}'.format(key).encode(), result.content)
+
+    def test_unknown_course_throws_404(self):
+        """If we're given an unknown master_course_id, throw a 404"""
+        result = self.client.post(reverse('create-ccx'), self.payload)
+
+        assert result.status_code == 404, result.content.decode('utf-8')
+
+    def test_request_error_returns_error(self):
+        """If there's an error with the edx request, return an error"""
+        course = CourseFactory.create()
+        self.payload['master_course_id'] = course.course_id
+
+        with mock.patch('courses.views.requests', autospec=True) as mock_req:
+            mock_req.post.side_effect = RequestException
+
+            result = self.client.post(reverse('create-ccx'), self.payload)
+
+            assert result.status_code == 502, result.content.decode('utf-8')
+
+    def test_errory_status_code_returns_error(self):
+        """If we get a status code from edx that looks error-y, throw an error"""
+        course = CourseFactory.create()
+        self.payload['master_course_id'] = course.course_id
+
+        with mock.patch('courses.views.requests', autospec=True) as mock_req:
+            mock_req.post.return_value.status_code = 500
+            mock_req.post.return_value.content = 'some error text'
+
+            result = self.client.post(reverse('create-ccx'), self.payload)
+
+            assert result.status_code == 502, result.content.decode('utf-8')
+
+    def test_201_on_happy_case(self):
+        """If all goes well, return 201"""
+        course = CourseFactory.create()
+        user_email = "john@example.com"
+        seats = 123
+        name = "CCX example title"
+
+        with mock.patch('courses.views.requests', autospec=True) as mock_req:
+            mock_req.post.return_value.status_code = 201
+
+            result = self.client.post(reverse('create-ccx'), {
+                'master_course_id': course.course_id,
+                'user_email': user_email,
+                'total_seats': seats,
+                'display_name': name
+            })
+
+            assert result.status_code == 201, result.content.decode('utf-8')

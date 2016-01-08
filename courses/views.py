@@ -1,18 +1,24 @@
 """
 Views for powering the Course Catalog API
 """
+import logging
 from six.moves.urllib import parse
 
 from django.core.urlresolvers import reverse
-
+from django.shortcuts import get_object_or_404
+import requests
+from requests.exceptions import RequestException
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
-from rest_framework.exceptions import ValidationError
+from rest_framework import serializers
 from rest_framework.response import Response
 
+from oauth_mgmt.utils import get_access_token
 from .models import Course, Module, EdxAuthor
 from .serializers import CourseSerializer, ModuleSerializer
 from .tasks import module_population
+
+log = logging.getLogger(__name__)
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -37,11 +43,11 @@ class CourseViewSet(viewsets.ModelViewSet):
         user = request.user
         data = request.data.copy()
         if not user.info.edx_instance:
-            raise ValidationError("User must have an associated edx_instance.")
+            raise serializers.ValidationError("User must have an associated edx_instance.")
         data['edx_instance'] = user.info.edx_instance
 
         if not data.get('image_url'):
-            raise ValidationError("You must specify an image_url")
+            raise serializers.ValidationError("You must specify an image_url")
         data['image_url'] = parse.urljoin(
             user.info.edx_instance.instance_url, data['image_url'])
 
@@ -109,3 +115,55 @@ def user_existence(request):
         return Response({"error": "Must provide a UID"}, status=400)
 
     return Response({"exists": EdxAuthor.objects.filter(edx_uid=uid).exists()})
+
+
+@api_view(['POST'])
+def create_ccx(request):
+    """
+    Supports creating a CCX on edx.
+    """
+    def upstream_error(msg=None):
+        """Generate logged errors for upstream response errors"""
+        err = {
+            'error': 'Unable to create course on upstream edx server. {}'.format(msg)
+        }
+        log.error(err['error'])
+        return Response(err, status=502)
+
+    missing = {
+        x for x in ('master_course_id', 'user_email', 'total_seats', 'display_name')
+        if x not in request.POST
+    }
+    if missing:
+        raise serializers.ValidationError(detail={
+            'error': 'You did not supply required POST argument(s): {}'.format(','.join(missing)),
+        })
+
+    master_course_id = request.POST['master_course_id']
+    course = get_object_or_404(Course, course_id=master_course_id)
+    access_token = get_access_token(course.edx_instance)
+    user_email = request.POST['user_email']
+
+    try:
+        resp = requests.post(
+            '{instance}/api/ccx/v0/ccx/'.format(instance=course.edx_instance.instance_url),
+            data={
+                'master_course_id': master_course_id,
+                'coach_email': user_email,
+                'max_students_allowed': request.POST['total_seats'],
+                'display_name': request.POST['display_name'],
+            },
+            headers={
+                'Authorization': 'Bearer {}'.format(access_token),
+            })
+    except RequestException as e:
+        return upstream_error(e)
+
+    if resp.status_code >= 300:
+        return upstream_error(resp.content)
+
+    log.info(
+        'Created ccx course for user {email} on master course {course_id}. Response: {response}',
+        email=user_email, course_id=master_course_id, response=resp.content)
+
+    return Response(status=201)
