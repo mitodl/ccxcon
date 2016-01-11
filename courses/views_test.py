@@ -277,7 +277,7 @@ class CCXCreateTests(ApiTests):
 
     def setUp(self):
         self.payload = {
-            'master_course_id': 'foo',
+            'master_course_id': '7955ceaa-c076-4a21-82f0-09527a8c8b7e',
             'user_email': 'bleh@example.com',
             'total_seats': 102,
             'display_name': 'test name',
@@ -304,7 +304,7 @@ class CCXCreateTests(ApiTests):
     def test_request_error_returns_error(self):
         """If there's an error with the edx request, return an error"""
         course = CourseFactory.create()
-        self.payload['master_course_id'] = course.course_id
+        self.payload['master_course_id'] = str(course.uuid)
 
         with mock.patch('courses.views.requests', autospec=True) as mock_req:
             mock_req.post.side_effect = RequestException
@@ -316,7 +316,7 @@ class CCXCreateTests(ApiTests):
     def test_errory_status_code_returns_error(self):
         """If we get a status code from edx that looks error-y, throw an error"""
         course = CourseFactory.create()
-        self.payload['master_course_id'] = course.course_id
+        self.payload['master_course_id'] = str(course.uuid)
 
         with mock.patch('courses.views.requests', autospec=True) as mock_req:
             mock_req.post.return_value.status_code = 500
@@ -337,7 +337,7 @@ class CCXCreateTests(ApiTests):
             mock_req.post.return_value.status_code = 201
 
             result = self.client.post(reverse('create-ccx'), {
-                'master_course_id': course.course_id,
+                'master_course_id': str(course.uuid),
                 'user_email': user_email,
                 'total_seats': seats,
                 'display_name': name

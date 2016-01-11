@@ -122,6 +122,12 @@ def user_existence(request):
 def create_ccx(request):
     """
     Supports creating a CCX on edx.
+
+    Request parameters:
+        master_course_id (string): UUID of the course you want to duplicate
+        user_email (string): email address of the user to make CCX Coach
+        display_name (string): Title of the CCX
+        max_students_allowed (int): Maximum number of students to allow into the ccx
     """
     def upstream_error(msg=None):
         """Generate logged errors for upstream response errors"""
@@ -140,8 +146,7 @@ def create_ccx(request):
             'error': 'You did not supply required POST argument(s): {}'.format(','.join(missing)),
         })
 
-    master_course_id = request.POST['master_course_id']
-    course = get_object_or_404(Course, course_id=master_course_id)
+    course = get_object_or_404(Course, uuid=request.POST['master_course_id'])
     access_token = get_access_token(course.edx_instance)
     user_email = request.POST['user_email']
 
@@ -149,7 +154,7 @@ def create_ccx(request):
         resp = requests.post(
             '{instance}/api/ccx/v0/ccx/'.format(instance=course.edx_instance.instance_url),
             data={
-                'master_course_id': master_course_id,
+                'master_course_id': course.course_id,
                 'coach_email': user_email,
                 'max_students_allowed': request.POST['total_seats'],
                 'display_name': request.POST['display_name'],
@@ -165,6 +170,6 @@ def create_ccx(request):
 
     log.info(
         'Created ccx course for user %s on master course %s. Response: %s',
-        user_email, master_course_id, resp.content)
+        user_email, course, resp.content)
 
     return Response(status=201)
