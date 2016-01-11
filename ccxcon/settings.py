@@ -16,7 +16,7 @@ import yaml
 
 import dj_database_url
 
-VERSION = "0.0.0"
+VERSION = "0.1.0"
 
 CONFIG_PATHS = [
     os.environ.get('CCXCON_CONFIG', ''),
