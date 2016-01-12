@@ -86,6 +86,7 @@ INSTALLED_APPS = (
     'sslserver',
 
     'courses',
+    'status',
     'webhooks',
     'oauth_mgmt',
 )
@@ -276,3 +277,9 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     )
 }
+
+# Token required to access the status page.
+STATUS_TOKEN = get_var(
+    'STATUS_TOKEN',
+    'CFQVK6CFCUE8FR6ZN8CWWHABN68BMD3Y8MGE3L7XWQB53U9MQ38VJ8N598TYR156'
+)
