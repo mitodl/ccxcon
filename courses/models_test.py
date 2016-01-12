@@ -25,8 +25,10 @@ class CourseTests(TestCase):
         test to_webhook implementation returns valid json object
         """
         course = CourseFactory.build()
-        json.dumps(course.to_webhook())
-        ex_pk = course.to_webhook()['external_pk']
+        out = course.to_webhook()
+        json.dumps(out)  # Test to ensure it's json dumpable.
+        ex_pk = out['external_pk']
+        assert out['instance'] == course.edx_instance.instance_url
         assert isinstance(ex_pk, str)
         assert '-' in ex_pk
 
@@ -64,7 +66,8 @@ class ModuleTests(TestCase):
         """
         module = ModuleFactory.build()
         web_out = module.to_webhook()
-        json.dumps(web_out)
+        json.dumps(web_out)  # Test to ensure it's json dumpable.
+        assert web_out['instance'] == module.course.edx_instance.instance_url
         for k in ('external_pk', 'course_external_pk'):
             assert isinstance(web_out[k], str)
             assert '-' in web_out[k]
