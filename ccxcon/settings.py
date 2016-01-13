@@ -247,6 +247,10 @@ LOGGING = {
             'handlers': ['console', 'syslog'],
             'level': LOG_LEVEL,
         },
+        'requests': {
+            'handlers': ['console', 'syslog'],
+            'level': LOG_LEVEL,
+        },
         'django': {
             'propagate': True,
             'level': DJANGO_LOG_LEVEL,
