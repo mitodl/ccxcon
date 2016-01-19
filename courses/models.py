@@ -57,6 +57,7 @@ class Course(models.Model):
         return {
             'title': self.title,
             'external_pk': str(self.uuid),
+            'instance': self.edx_instance.instance_url,
         }
 
 
@@ -87,6 +88,7 @@ class Module(models.Model):
             'external_pk': str(self.uuid),
             'subchapters': self.subchapters,
             'course_external_pk': str(self.course.uuid),
+            'instance': self.course.edx_instance.instance_url,
         }
 
 
