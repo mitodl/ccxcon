@@ -48,6 +48,7 @@ celery:
   environment:
     DJANGO_LOG_LEVEL: INFO
     DATABASE_URL: postgres://postgres@db:5432/postgres
+    CCXCON_DB_DISABLE_SSL: 'True'
     BROKER_URL: redis://redis:6379/4
     CELERY_RESULT_BACKEND: redis://redis:6379/4
   links:
