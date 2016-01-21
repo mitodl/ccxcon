@@ -38,6 +38,7 @@ class ModuleFactory(DjangoModelFactory):
     """Factory for Module"""
     course = factory.SubFactory(CourseFactory)
     title = fuzzy.FuzzyText(prefix="Module ")
+    locator_id = fuzzy.FuzzyText(length=30)
 
     class Meta:  # pylint: disable=missing-docstring
         model = Module
