@@ -2,8 +2,6 @@
 
 git
 libpq-dev
-python-pip
-python3-pip
 python-dev
 python3-dev
 npm

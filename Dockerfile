@@ -7,10 +7,15 @@ WORKDIR /tmp
 # Install base packages
 COPY apt.txt /tmp/apt.txt
 RUN apt-get update &&\
+    apt-get install curl -y &&\
     apt-get install -y $(grep -vE "^\s*#" apt.txt  | tr "\n" " ") &&\
     ln -s /usr/bin/nodejs /usr/bin/node &&\
-    pip install pip --upgrade &&\
     npm install -g dredd@1.0.1
+
+# Install pip
+RUN curl --silent --location https://bootstrap.pypa.io/get-pip.py > get-pip.py &&\
+    python3 get-pip.py &&\
+    python get-pip.py
 
 # Add non-root user.
 RUN adduser --disabled-password --gecos "" mitodl
