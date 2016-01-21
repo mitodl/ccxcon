@@ -44,10 +44,12 @@ class CourseViewSet(viewsets.ModelViewSet):
         user = request.user
         data = request.data.copy()
         if not user.info.edx_instance:
+            log.info("User %s didn't have an associated edx_instance", request.user)
             raise serializers.ValidationError("User must have an associated edx_instance.")
         data['edx_instance'] = user.info.edx_instance
 
         if not data.get('image_url'):
+            log.info("Didn't specify an image_url")
             raise serializers.ValidationError("You must specify an image_url")
         data['image_url'] = parse.urljoin(
             user.info.edx_instance.instance_url, data['image_url'])
