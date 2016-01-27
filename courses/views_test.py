@@ -344,3 +344,32 @@ class CCXCreateTests(ApiTests):
             })
 
             assert result.status_code == 201, result.content.decode('utf-8')
+
+    def test_course_modules_must_belong_to_course(self):
+        """
+        Test with course modules not belonging to the course
+        """
+        payload = self.payload.copy()
+        course = CourseFactory.create()
+        payload['master_course_id'] = str(course.uuid)
+        course_modules_real = [str(ModuleFactory(course=course).uuid) for _ in range(5)]
+        course_modules_fake = [uuid.uuid4().hex for _ in range(5)]
+        payload['course_modules'] = course_modules_real + course_modules_fake
+        result = self.client.post(reverse('create-ccx'), payload)
+        assert result.status_code == 400, result.content.decode('utf-8')
+        assert re.search(b'UUID do not belong to the specified master course', result.content)
+
+    def test_201_on_happy_case_with_modules(self):
+        """
+        Same as test_201_on_happy_case, but with a list of course modules
+        """
+        payload = self.payload.copy()
+        course = CourseFactory.create()
+        payload['master_course_id'] = str(course.uuid)
+        course_modules = [ModuleFactory(course=course) for _ in range(10)]
+        payload['course_modules'] = [str(course_module.uuid) for course_module in course_modules]
+
+        with mock.patch('courses.views.requests', autospec=True) as mock_req:
+            mock_req.post.return_value.status_code = 201
+            result = self.client.post(reverse('create-ccx'), payload)
+        assert result.status_code == 201, result.content.decode('utf-8')

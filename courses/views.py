@@ -129,7 +129,8 @@ def create_ccx(request):
         master_course_id (string): UUID of the course you want to duplicate
         user_email (string): email address of the user to make CCX Coach
         display_name (string): Title of the CCX
-        max_students_allowed (int): Maximum number of students to allow into the ccx
+        total_seats (int): Maximum number of students to allow into the ccx
+        course_modules (list): Optional. List of strings representing course module UUIDs
     """
     def upstream_error(msg=None):
         """Generate logged errors for upstream response errors"""
@@ -138,7 +139,6 @@ def create_ccx(request):
         }
         log.error(err['error'])
         return Response(err, status=502)
-
     missing = {
         x for x in ('master_course_id', 'user_email', 'total_seats', 'display_name')
         if x not in request.POST
@@ -152,15 +152,32 @@ def create_ccx(request):
     access_token = get_access_token(course.edx_instance)
     user_email = request.POST['user_email']
 
+    payload = {
+        'master_course_id': course.course_id,
+        'coach_email': user_email,
+        'max_students_allowed': request.POST['total_seats'],
+        'display_name': request.POST['display_name'],
+    }
+    course_modules = request.POST.getlist('course_modules')
+    if course_modules:
+        course_modules_qs = Module.objects.filter(course=course, uuid__in=course_modules)
+        if course_modules_qs.count() != len(course_modules):
+            raise serializers.ValidationError(
+                detail={
+                    'error': (
+                        'One or more course_modules UUID do '
+                        'not belong to the specified master course'
+                    )
+                }
+            )
+        payload['course_modules'] = [
+            course_module.locator_id for course_module in course_modules_qs
+        ]
+
     try:
         resp = requests.post(
             '{instance}/api/ccx/v0/ccx/'.format(instance=course.edx_instance.instance_url),
-            data={
-                'master_course_id': course.course_id,
-                'coach_email': user_email,
-                'max_students_allowed': request.POST['total_seats'],
-                'display_name': request.POST['display_name'],
-            },
+            data=payload,
             headers={
                 'Authorization': 'Bearer {}'.format(access_token),
             })
