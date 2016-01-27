@@ -100,7 +100,7 @@ class ModuleViewSet(viewsets.ModelViewSet):
         return super(ModuleViewSet, self).update(request, **kwargs)
 
     def list(self, request, uuid_uuid):
-        "List of modules filtered by parent course."
+        """List of modules filtered by parent course."""
         modules = self.queryset.filter(course__uuid=uuid_uuid)
         serializer = self.serializer_class(
             modules, many=True, context={'request': request})
@@ -139,29 +139,30 @@ def create_ccx(request):
         }
         log.error(err['error'])
         return Response(err, status=502)
+    data = request.data
     missing = {
-        x for x in ('master_course_id', 'user_email', 'total_seats', 'display_name')
-        if x not in request.POST
+        key for key in ('master_course_id', 'user_email', 'total_seats', 'display_name')
+        if key not in data
     }
     if missing:
         raise serializers.ValidationError(detail={
             'error': 'You did not supply required POST argument(s): {}'.format(','.join(missing)),
         })
 
-    course = get_object_or_404(Course, uuid=request.POST['master_course_id'])
+    course = get_object_or_404(Course, uuid=data['master_course_id'])
     access_token = get_access_token(course.edx_instance)
-    user_email = request.POST['user_email']
+    user_email = data['user_email']
 
     payload = {
         'master_course_id': course.course_id,
         'coach_email': user_email,
-        'max_students_allowed': request.POST['total_seats'],
-        'display_name': request.POST['display_name'],
+        'max_students_allowed': data['total_seats'],
+        'display_name': data['display_name'],
     }
-    course_modules = request.POST.getlist('course_modules')
-    if course_modules:
-        course_modules_qs = Module.objects.filter(course=course, uuid__in=course_modules)
-        if course_modules_qs.count() != len(course_modules):
+    course_modules = data.get('course_modules')
+    if course_modules is not None:
+        course_modules_queryset = Module.objects.filter(course=course, uuid__in=course_modules)
+        if course_modules_queryset.count() != len(course_modules):
             raise serializers.ValidationError(
                 detail={
                     'error': (
@@ -171,7 +172,7 @@ def create_ccx(request):
                 }
             )
         payload['course_modules'] = [
-            course_module.locator_id for course_module in course_modules_qs
+            course_module.locator_id for course_module in course_modules_queryset
         ]
 
     try:

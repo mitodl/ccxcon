@@ -290,14 +290,22 @@ class CCXCreateTests(ApiTests):
             payload = self.payload.copy()
             del payload[key]
 
-            result = self.client.post(reverse('create-ccx'), payload)
+            result = self.client.post(
+                reverse('create-ccx'),
+                json.dumps(payload),
+                content_type="application/json"
+            )
 
             assert result.status_code == 400, result.content.decode('utf-8')
             assert re.search('POST argument.*{}'.format(key).encode(), result.content)
 
     def test_unknown_course_throws_404(self):
         """If we're given an unknown master_course_id, throw a 404"""
-        result = self.client.post(reverse('create-ccx'), self.payload)
+        result = self.client.post(
+            reverse('create-ccx'),
+            json.dumps(self.payload),
+            content_type="application/json"
+        )
 
         assert result.status_code == 404, result.content.decode('utf-8')
 
@@ -309,7 +317,11 @@ class CCXCreateTests(ApiTests):
         with mock.patch('courses.views.requests', autospec=True) as mock_req:
             mock_req.post.side_effect = RequestException
 
-            result = self.client.post(reverse('create-ccx'), self.payload)
+            result = self.client.post(
+                reverse('create-ccx'),
+                json.dumps(self.payload),
+                content_type="application/json"
+            )
 
             assert result.status_code == 502, result.content.decode('utf-8')
 
@@ -322,7 +334,11 @@ class CCXCreateTests(ApiTests):
             mock_req.post.return_value.status_code = 500
             mock_req.post.return_value.content = 'some error text'
 
-            result = self.client.post(reverse('create-ccx'), self.payload)
+            result = self.client.post(
+                reverse('create-ccx'),
+                json.dumps(self.payload),
+                content_type="application/json"
+            )
 
             assert result.status_code == 502, result.content.decode('utf-8')
 
@@ -336,12 +352,12 @@ class CCXCreateTests(ApiTests):
         with mock.patch('courses.views.requests', autospec=True) as mock_req:
             mock_req.post.return_value.status_code = 201
 
-            result = self.client.post(reverse('create-ccx'), {
+            result = self.client.post(reverse('create-ccx'), json.dumps({
                 'master_course_id': str(course.uuid),
                 'user_email': user_email,
                 'total_seats': seats,
                 'display_name': name
-            })
+            }), content_type="application/json")
 
             assert result.status_code == 201, result.content.decode('utf-8')
 
@@ -355,7 +371,11 @@ class CCXCreateTests(ApiTests):
         course_modules_real = [str(ModuleFactory(course=course).uuid) for _ in range(5)]
         course_modules_fake = [uuid.uuid4().hex for _ in range(5)]
         payload['course_modules'] = course_modules_real + course_modules_fake
-        result = self.client.post(reverse('create-ccx'), payload)
+        result = self.client.post(
+            reverse('create-ccx'),
+            json.dumps(payload),
+            content_type="application/json"
+        )
         assert result.status_code == 400, result.content.decode('utf-8')
         assert re.search(b'UUID do not belong to the specified master course', result.content)
 
@@ -371,5 +391,9 @@ class CCXCreateTests(ApiTests):
 
         with mock.patch('courses.views.requests', autospec=True) as mock_req:
             mock_req.post.return_value.status_code = 201
-            result = self.client.post(reverse('create-ccx'), payload)
+            result = self.client.post(
+                reverse('create-ccx'),
+                json.dumps(payload),
+                content_type="application/json"
+            )
         assert result.status_code == 201, result.content.decode('utf-8')
