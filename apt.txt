@@ -4,8 +4,6 @@ git
 libpq-dev
 python-dev
 python3-dev
-npm
-nodejs
 
 # developer requirements
 postgresql-client

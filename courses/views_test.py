@@ -5,7 +5,7 @@ import uuid
 
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 import mock
 from requests.exceptions import RequestException
 
@@ -25,6 +25,47 @@ class ApiTests(TestCase):
         assert self.client.login(username='test', password='test')
 
 
+def course_detail_dict(course):
+    """Helper function to produce the expected course detail response"""
+    # Request so we can call build_absolute_uri
+    request = RequestFactory().get("")
+    return {
+        "uuid": str(course.uuid),
+        "title": course.title,
+        "author_name": course.author_name,
+        "overview": course.overview,
+        "description": course.description,
+        "image_url": course.image_url,
+        "edx_instance": course.edx_instance.instance_url,
+        "url": request.build_absolute_uri(reverse('course-detail', kwargs={
+            'uuid': str(course.uuid)
+        })),
+        "modules": request.build_absolute_uri(reverse('module-list', kwargs={
+            'uuid_uuid': str(course.uuid)
+        })),
+        "instructors": [],
+        "course_id": course.course_id
+    }
+
+
+def module_detail_dict(module):
+    """Helper function to produce the expected module detail response"""
+    # Request so we can call build_absolute_uri
+    request = RequestFactory().get("")
+    return {
+        "uuid": str(module.uuid),
+        "title": str(module.title),
+        "subchapters": module.subchapters,
+        "course": request.build_absolute_uri(reverse('course-detail', kwargs={
+            "uuid": str(module.course.uuid)
+        })),
+        "url": request.build_absolute_uri(reverse('module-detail', kwargs={
+            "uuid": str(module.uuid),
+            "uuid_uuid": str(module.course.uuid),
+        }))
+    }
+
+
 class JsonResponseTests(ApiTests):
     """
     Tests that json responses are what we expect.
@@ -42,32 +83,7 @@ class JsonResponseTests(ApiTests):
 
         resp = self.client.get(reverse('module-list', args=(m1.course.uuid,)))
         payload = json.loads(resp.content.decode('utf-8'))
-        self.assertEqual(len(payload), 1)
-
-    def test_bad_json(self):
-        """
-        Test that invalid JSON is rejected and model state is unaffected.
-        """
-        course = CourseFactory.create(**{
-            "title": "title1",
-            "author_name": "author1",
-            "overview": "overview1",
-            "course_id": COURSE_ID,
-            "description": "description1",
-            "image_url": "http://placehold.it/350x150",
-        })
-
-        module_dict = {
-            "title": "title",
-            "subchapters": "['a', 3]",
-        }
-        modules_url = reverse('module-list', args=(course.uuid,))
-        with mock.patch('courses.views.module_population', autospec=True):
-            resp = self.client.post(modules_url, module_dict)
-        self.assertEqual(resp.status_code, 400)  # Invalid JSON
-
-        resp = self.client.get(modules_url)
-        self.assertEqual(resp.status_code, 200, msg=resp.content)
+        assert payload == [module_detail_dict(m1)]
 
     def test_create_course_accepts_instructors(self):
         """
@@ -89,6 +105,79 @@ class JsonResponseTests(ApiTests):
             })
         self.assertEqual(resp.status_code, 201, msg=resp.content)
         assert EdxAuthor.objects.count() == 2
+
+    def test_get_course_list(self):
+        """
+        The course list API should list all courses available.
+        """
+        course = CourseFactory.create()
+        resp = self.client.get(reverse('course-list'))
+        assert resp.status_code == 200, resp.content.decode('utf-8')
+        course_list = json.loads(resp.content.decode('utf-8'))
+        assert course_list == [course_detail_dict(course)]
+
+        # Make sure users not logged in can't list courses
+        self.client.logout()
+        resp = self.client.get(reverse('course-list'))
+        assert resp.status_code == 401, resp.content.decode('utf-8')
+
+    def test_get_course_detail(self):
+        """
+        The course detail API should show information about a specific course.
+        """
+        course = CourseFactory.create()
+        resp = self.client.get(reverse('course-detail', kwargs={"uuid": str(course.uuid)}))
+        assert resp.status_code == 200, resp.content.decode('utf-8')
+        course_detail = json.loads(resp.content.decode('utf-8'))
+        assert course_detail == course_detail_dict(course)
+
+        # Make sure users not logged in can't see the course detail view
+        self.client.logout()
+        resp = self.client.get(reverse('course-detail', kwargs={"uuid": str(course.uuid)}))
+        assert resp.status_code == 401, resp.content.decode('utf-8')
+
+    def test_get_module_detail(self):
+        """
+        The module detail API should show information about a specific module.
+        """
+        module = ModuleFactory.create()
+
+        resp = self.client.get(reverse('module-detail', kwargs={
+            "uuid_uuid": module.course.uuid,
+            "uuid": module.uuid
+        }))
+        assert resp.status_code == 200, resp.content.decode('utf-8')
+        payload = json.loads(resp.content.decode('utf-8'))
+        assert payload == module_detail_dict(module)
+
+        # Make sure users not logged in can't list courses
+        self.client.logout()
+        resp = self.client.get(reverse('module-detail', kwargs={
+            "uuid_uuid": module.course.uuid,
+            "uuid": module.uuid
+        }))
+        assert resp.status_code == 401, resp.content.decode('utf-8')
+
+    def test_illegal_methods(self):
+        """
+        Assert that we are not using certain HTTP methods.
+        """
+        module = ModuleFactory.create()
+        course_list = reverse('course-list')
+        course_detail = reverse('course-detail', kwargs={"uuid": module.course.uuid})
+        module_list = reverse('module-list', kwargs={"uuid_uuid": module.course.uuid})
+        module_detail = reverse('module-detail', kwargs={
+            "uuid_uuid": module.course.uuid,
+            "uuid": module.uuid
+        })
+
+        for url in (course_list, course_detail, module_list, module_detail):
+            assert self.client.patch(url).status_code == 405
+            assert self.client.put(url).status_code == 405
+            assert self.client.delete(url).status_code == 405
+
+        for url in (course_detail, module_list, module_detail):
+            assert self.client.post(url).status_code == 405
 
     def test_create_course_does_module_population(self):
         """
@@ -397,3 +486,23 @@ class CCXCreateTests(ApiTests):
                 content_type="application/json"
             )
         assert result.status_code == 201, result.content.decode('utf-8')
+
+    def test_not_logged_in(self):
+        """
+        Test that users who are not logged in can't do anything.
+        """
+        self.client.logout()
+
+        course = CourseFactory.create()
+        user_email = "john@example.com"
+        seats = 123
+        name = "CCX example title"
+
+        result = self.client.post(reverse('create-ccx'), json.dumps({
+            'master_course_id': str(course.uuid),
+            'user_email': user_email,
+            'total_seats': seats,
+            'display_name': name
+        }), content_type="application/json")
+
+        assert result.status_code == 401, result.content.decode('utf-8')
