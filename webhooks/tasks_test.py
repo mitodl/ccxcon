@@ -14,6 +14,7 @@ from django.utils.crypto import constant_time_compare
 from django.utils.encoding import force_bytes
 import pytest
 from requests.exceptions import RequestException
+from requests import Response
 
 from courses.factories import CourseFactory
 from webhooks.factories import WebhookFactory
@@ -100,7 +101,10 @@ class PublishWebhookTests(TestCase):
         WebhookFactory.create(url="http://example.com")
         course = CourseFactory.create()
         with mock.patch('webhooks.tasks.requests', autospec=True) as mock_requests:
-            mock_requests.post.side_effect = [RequestException("couldn't post"), None]
+            response = Response()
+            response._content = b""  # pylint: disable=protected-access
+            response.status_code = 400
+            mock_requests.post.side_effect = [RequestException("couldn't post"), response]
             publish_webhook('courses.Course', 'pk', course.pk)
             assert mock_requests.post.call_count == 2
 
