@@ -4,13 +4,16 @@ Views for powering the Course Catalog API
 import logging
 from six.moves.urllib import parse
 
-from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 import requests
 from requests.exceptions import RequestException
-from rest_framework import viewsets, status
+from rest_framework import viewsets, serializers, status
 from rest_framework.decorators import api_view
-from rest_framework import serializers
+from rest_framework.mixins import (
+    CreateModelMixin,
+    ListModelMixin,
+    RetrieveModelMixin,
+)
 from rest_framework.response import Response
 
 from oauth_mgmt.utils import get_access_token
@@ -22,7 +25,8 @@ from .tasks import module_population
 log = logging.getLogger(__name__)
 
 
-class CourseViewSet(viewsets.ModelViewSet):
+class CourseViewSet(
+        CreateModelMixin, ListModelMixin, RetrieveModelMixin, viewsets.GenericViewSet):
     """
     Course API
     """
@@ -65,7 +69,7 @@ class CourseViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(
                 instance, data=data, partial=partial)
             serializer.is_valid(raise_exception=True)
-            self.perform_update(serializer)
+            serializer.save()
             module_population.delay(serializer.instance.course_id)
             return Response(serializer.data)
         else:
@@ -79,7 +83,7 @@ class CourseViewSet(viewsets.ModelViewSet):
                 serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
-class ModuleViewSet(viewsets.ModelViewSet):
+class ModuleViewSet(ListModelMixin, RetrieveModelMixin, viewsets.GenericViewSet):
     """
     Module API
     """
@@ -87,19 +91,7 @@ class ModuleViewSet(viewsets.ModelViewSet):
     lookup_field = 'uuid'
     serializer_class = ModuleSerializer
 
-    def create(self, request, **kwargs):
-        # uuid_uuid is the uuid field of the parent resource (Course)
-        request.data['course'] = reverse(
-            'course-detail', args=(kwargs['uuid_uuid'],))
-        return super(ModuleViewSet, self).create(request, **kwargs)
-
-    def update(self, request, **kwargs):
-        # uuid_uuid is the uuid field of the parent resource (Course)
-        request.data['course'] = reverse(
-            'course-detail', args=(kwargs['uuid_uuid'],))
-        return super(ModuleViewSet, self).update(request, **kwargs)
-
-    def list(self, request, uuid_uuid):
+    def list(self, request, uuid_uuid):  # pylint: disable=arguments-differ
         """List of modules filtered by parent course."""
         modules = self.queryset.filter(course__uuid=uuid_uuid)
         serializer = self.serializer_class(
