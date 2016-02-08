@@ -8,7 +8,6 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from rest_framework_nested import routers
 
 from courses.views import CourseViewSet, ModuleViewSet
-from status.views import status
 
 router = routers.DefaultRouter()
 router.register('coursexs', CourseViewSet)
@@ -23,7 +22,7 @@ urlpatterns = [
     url(r'^api/v1/user_exists/$', 'courses.views.user_existence', name='user-existence'),
     url(r'^api/v1/ccx/$', 'courses.views.create_ccx', name='create-ccx'),
     url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
-    url(r'^status/$', status, name='status'),
+    url(r'^status/', include('server_status.urls')),
 ]
 
 urlpatterns += staticfiles_urlpatterns()

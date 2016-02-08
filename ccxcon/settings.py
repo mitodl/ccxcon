@@ -86,7 +86,7 @@ INSTALLED_APPS = (
     'sslserver',
 
     'courses',
-    'status',
+    'server_status',
     'webhooks',
     'oauth_mgmt',
 )
@@ -264,6 +264,7 @@ LOGGING = {
 
 # Celery
 BROKER_URL = get_var("BROKER_URL", get_var("REDISCLOUD_URL", None))
+USE_CELERY = True
 CELERY_RESULT_BACKEND = get_var(
     "CELERY_RESULT_BACKEND", get_var("REDISCLOUD_URL", None)
 )
@@ -287,3 +288,5 @@ STATUS_TOKEN = get_var(
     'STATUS_TOKEN',
     'CFQVK6CFCUE8FR6ZN8CWWHABN68BMD3Y8MGE3L7XWQB53U9MQ38VJ8N598TYR156'
 )
+
+HEALTH_CHECK = ['CELERY', 'REDIS', 'POSTGRES']
