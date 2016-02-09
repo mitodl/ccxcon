@@ -30,6 +30,7 @@ web:
     COVERAGE_DIR: htmlcov
     CCXCON_SECURE_SSL_REDIRECT: 'False'
     CELERY_ALWAYS_EAGER: 'False'
+    STATUS_TOKEN: 'test-token'
     CELERY_RESULT_BACKEND: redis://redis:6379/4
     BROKER_URL: redis://redis:6379/4
   ports:
