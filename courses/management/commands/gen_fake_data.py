@@ -5,6 +5,8 @@ from random import randint
 from django.core.management import BaseCommand
 
 from courses.factories import CourseFactory, ModuleFactory
+from oauth_mgmt.factories import BackingInstanceFactory
+from oauth_mgmt.models import BackingInstance
 
 
 class Command(BaseCommand):
@@ -30,8 +32,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         record_count = 0
+        try:
+            bi = BackingInstance.objects.get(instance_url='https://edx.org')
+        except BackingInstance.DoesNotExist:
+            bi = BackingInstanceFactory.create(instance_url='https://edx.org')
         for _ in range(int(options['courses'])):
-            course = CourseFactory.create()
+            course = CourseFactory.create(edx_instance=bi)
             record_count += 1
             module_range = range(randint(1, int(options['modules'])))
             for _ in module_range:

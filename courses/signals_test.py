@@ -7,6 +7,7 @@ import mock
 from django.contrib.auth.models import User
 from django.test import TestCase
 
+from oauth_mgmt.factories import BackingInstanceFactory
 from courses.models import UserInfo
 from courses.factories import CourseFactory, ModuleFactory
 
@@ -19,14 +20,15 @@ class PublishOnUpdateTests(TestCase):
         """
         When course is saved, it should trigger webhook.
         """
-        course = CourseFactory.build()
+        bi = BackingInstanceFactory.create()
+        course = CourseFactory.build(edx_instance=bi)
         with mock.patch('courses.signals.publish_webhook', autospec=True) as wh_mock:
             course.save()
             assert wh_mock.delay.call_count == 1
             args, _ = wh_mock.delay.call_args
             assert args[0] == 'courses.Course'
             assert args[1] == 'uuid'
-            assert args[2] == course.uuid
+            assert args[2] == str(course.uuid)
 
     def test_module_save_publishes(self):
         """
@@ -40,7 +42,7 @@ class PublishOnUpdateTests(TestCase):
             args, _ = wh_mock.delay.call_args
             assert args[0] == 'courses.Module'
             assert args[1] == 'uuid'
-            assert args[2] == module.uuid
+            assert args[2] == str(module.uuid)
 
 
 class CreateProfileTests(TestCase):
