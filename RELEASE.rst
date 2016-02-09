@@ -2,7 +2,7 @@ Release Notes
 =============
 
 Version 0.2.0
-=============
+-------------
 
 - Added missing release_notes template files.
 - Changed to ``django-server-status``.
@@ -26,4 +26,3 @@ Version 0.1.0
 -------------
 
 - Initial release
-
