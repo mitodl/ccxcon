@@ -486,6 +486,25 @@ class CCXCreateTests(ApiTests):
                 content_type="application/json"
             )
         assert result.status_code == 201, result.content.decode('utf-8')
+        # check that the payload has been sent to edx as json
+        # this means that the requests library will encode it properly
+        # and add the `application/json` content type header
+        call_to_edx = mock_req.post.call_args
+        call_content = call_to_edx[1]
+        assert 'json' in call_content
+        payload_to_edx = {
+            'course_modules': [course_module.locator_id for course_module in course_modules],
+            'coach_email': payload['user_email'],
+            'master_course_id': course.course_id,
+            'display_name': payload['display_name'],
+            'max_students_allowed': payload['total_seats']
+        }
+        for key, value in payload_to_edx.items():
+            assert key in call_content['json']
+            if not isinstance(value, list):
+                assert value == call_content['json'][key]
+            else:
+                assert sorted(value) == sorted(call_content['json'][key])
 
     def test_not_logged_in(self):
         """
