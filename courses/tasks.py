@@ -29,6 +29,7 @@ def get_backoff(retries=0):
     return (retries + 1) ** 2 * 60 + 60
 
 
+# pylint: disable=too-many-locals
 @async.task(bind=True, max_retries=5)
 def module_population(self, course_id):
     """
@@ -49,7 +50,7 @@ def module_population(self, course_id):
                 "depth": "all",
                 "username": course.edx_instance.username,
                 "course_id": course.course_id,
-                "requested_fields": "children,display_name,id,type",
+                "requested_fields": "children,display_name,id,type,visible_to_staff_only",
             }, headers={
                 'Authorization': 'Bearer {}'.format(access_token)
             })
@@ -61,19 +62,26 @@ def module_population(self, course_id):
 
     j_resp = resp.json()
     blocks = j_resp['blocks']
-    root_chapters = blocks[j_resp['root']]['children']
-    chapters = [blocks[x] for x in root_chapters]
-    known_course_ids = {x['id'] for x in chapters}
+    locations = blocks[j_resp['root']]['children']
+    chapters = [blocks[location] for location in locations]
+    visible_course_ids = {
+        chapter['id'] for chapter in chapters
+        if not chapter.get('visible_to_staff_only')
+    }
 
     # Delete happens first so we don't have duplicate `order` entries.
-    for module in course.module_set.exclude(locator_id__in=known_course_ids):
+    for module in course.module_set.exclude(locator_id__in=visible_course_ids):
         module.delete()
 
     for num, payload in enumerate(chapters):
+        locator_id = payload['id']
+        if locator_id not in visible_course_ids:
+            continue
+
         try:
-            module = Module.objects.get(course=course, locator_id=payload['id'])
+            module = Module.objects.get(course=course, locator_id=locator_id)
         except Module.DoesNotExist:
-            module = Module(course=course, locator_id=payload['id'])
+            module = Module(course=course, locator_id=locator_id)
         module.title = payload['display_name']
         module.order = num
         module.subchapters = get_subchapters(module.locator_id, blocks)
