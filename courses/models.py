@@ -40,7 +40,7 @@ class Course(models.Model):
     image_url = models.URLField()
     instructors = models.ManyToManyField(EdxAuthor)
 
-    edx_instance = models.URLField(max_length=255)
+    edx_instance = models.ForeignKey('oauth_mgmt.BackingInstance', null=True)
     live = models.BooleanField(default=False)
 
     deleted = models.BooleanField(default=False)
@@ -57,6 +57,7 @@ class Course(models.Model):
         return {
             'title': self.title,
             'external_pk': str(self.uuid),
+            'instance': self.edx_instance.instance_url,
         }
 
 
@@ -70,6 +71,10 @@ class Module(models.Model):
     title = models.CharField(max_length=255)
     subchapters = JSONField(default=tuple())  # Array of strings.
     locator_id = models.CharField(max_length=255)
+    order = models.IntegerField(default=0)
+
+    class Meta:  # pylint: disable=missing-docstring
+        ordering = ('course_id', 'order')
 
     def __str__(self):
         return self.title
@@ -82,7 +87,8 @@ class Module(models.Model):
             'title': self.title,
             'external_pk': str(self.uuid),
             'subchapters': self.subchapters,
-            'course_external_pk': self.course.uuid,
+            'course_external_pk': str(self.course.uuid),
+            'instance': self.course.edx_instance.instance_url,
         }
 
 
@@ -92,7 +98,7 @@ class UserInfo(models.Model):
     Additional information for a given user.
     """
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='info')
-    edx_instance = models.URLField(max_length=255, blank=True, null=True)
+    edx_instance = models.ForeignKey('oauth_mgmt.BackingInstance', blank=True, null=True)
 
     def __str__(self):
         return "Profile for {}".format(self.user)

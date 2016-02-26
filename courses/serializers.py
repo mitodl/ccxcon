@@ -8,6 +8,7 @@ from rest_framework import serializers
 
 from .fields import JsonListField, StringyManyToManyField
 from .models import Course, Module, EdxAuthor
+from oauth_mgmt.models import BackingInstance
 
 log = logging.getLogger(__name__)
 
@@ -16,7 +17,10 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
     """
     Handles the serialization of Course objects.
     """
-    edx_instance = serializers.CharField(allow_blank=True)
+    edx_instance = serializers.SlugRelatedField(
+        slug_field='instance_url',
+        queryset=BackingInstance.objects.all(),
+    )
     modules = serializers.SerializerMethodField('module_list')
     instructors = StringyManyToManyField(model=EdxAuthor, lookup="edx_uid")
 

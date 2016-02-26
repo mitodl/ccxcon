@@ -6,7 +6,7 @@ function incr_err() {
 }
 
 # check that mock.patch calls use autospec
-OUTPUT=`git grep "patch(" | grep -v "autospec"`
+OUTPUT=`git grep -e "mock\\.patch(" --or -e "\spatch(" | grep -v "autospec"`
 if [ "$OUTPUT" = "" ]; then
     echo "Autospec check.. DONE"
 else

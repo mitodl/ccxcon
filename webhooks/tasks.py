@@ -11,6 +11,7 @@ from django.core.exceptions import FieldError
 from django.utils.encoding import force_bytes
 import requests
 from requests.exceptions import RequestException
+from rest_framework.status import HTTP_200_OK
 
 from ccxcon.celery import async
 from webhooks.models import Webhook
@@ -81,9 +82,20 @@ def publish_webhook(model_str, lookup_field, lookup_value):
             j_payload = json.dumps(payload)
             signature = hmac.new(force_bytes(wh.secret), force_bytes(j_payload),
                                  hashlib.sha1).hexdigest()
-            requests.post(wh.url, json=j_payload, headers={
+            log.debug("Posting payload with signature %s. Payload: %s", signature, j_payload)
+            # NOTE: Using the non-stringy version, given we're posting this as json.
+            resp = requests.post(wh.url, json=payload, headers={
                 'X-CCXCon-Signature': signature
             })
+            if resp.status_code != HTTP_200_OK:
+                log.error(
+                    "Got a non-200 status when posting payload %s to URL %s."
+                    " Code: %s, response: %s",
+                    j_payload,
+                    wh.url,
+                    resp.status_code,
+                    resp.content.decode('utf-8')
+                )
         except RequestException as e:
             log.error("Failed to post to %s with payload %s due to error %s",
                       wh.url, j_payload, e)

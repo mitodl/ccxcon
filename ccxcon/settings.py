@@ -16,7 +16,7 @@ import yaml
 
 import dj_database_url
 
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 
 CONFIG_PATHS = [
     os.environ.get('CCXCON_CONFIG', ''),
@@ -86,7 +86,9 @@ INSTALLED_APPS = (
     'sslserver',
 
     'courses',
+    'server_status',
     'webhooks',
+    'oauth_mgmt',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -233,6 +235,22 @@ LOGGING = {
             'handlers': ['console', 'syslog'],
             'level': LOG_LEVEL,
         },
+        'webhooks': {
+            'handlers': ['console', 'syslog'],
+            'level': LOG_LEVEL,
+        },
+        'courses': {
+            'handlers': ['console', 'syslog'],
+            'level': LOG_LEVEL,
+        },
+        'oauth_mgmt': {
+            'handlers': ['console', 'syslog'],
+            'level': LOG_LEVEL,
+        },
+        'requests': {
+            'handlers': ['console', 'syslog'],
+            'level': LOG_LEVEL,
+        },
         'django': {
             'propagate': True,
             'level': DJANGO_LOG_LEVEL,
@@ -246,6 +264,7 @@ LOGGING = {
 
 # Celery
 BROKER_URL = get_var("BROKER_URL", get_var("REDISCLOUD_URL", None))
+USE_CELERY = True
 CELERY_RESULT_BACKEND = get_var(
     "CELERY_RESULT_BACKEND", get_var("REDISCLOUD_URL", None)
 )
@@ -263,3 +282,11 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     )
 }
+
+# Token required to access the status page.
+STATUS_TOKEN = get_var(
+    'STATUS_TOKEN',
+    'CFQVK6CFCUE8FR6ZN8CWWHABN68BMD3Y8MGE3L7XWQB53U9MQ38VJ8N598TYR156'
+)
+
+HEALTH_CHECK = ['CELERY', 'REDIS', 'POSTGRES']
