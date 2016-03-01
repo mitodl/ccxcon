@@ -2,6 +2,7 @@
 Utility functions.
 """
 from datetime import timedelta
+from six.moves.urllib.parse import urljoin  # pylint: disable=import-error
 
 from django.utils.timezone import now
 import requests
@@ -46,7 +47,7 @@ def get_access_token(instance):
         }
 
     resp = requests.post(
-        "{instance}/oauth2/access_token/".format(instance=instance.instance_url),
+        urljoin(instance.instance_url, '/oauth2/access_token/'),
         data=params)
     if resp.status_code >= 300:
         raise UnretrievableToken(

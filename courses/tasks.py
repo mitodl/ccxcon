@@ -1,6 +1,8 @@
 """
 Course Tasks
 """
+from six.moves.urllib.parse import urljoin  # pylint: disable=import-error
+
 import requests
 from requests.exceptions import RequestException
 
@@ -44,9 +46,8 @@ def module_population(self, course_id):
 
     try:
         resp = requests.get(
-            "{instance}/api/courses/v1/blocks/".format(
-                instance=course.edx_instance.instance_url,
-            ), params={
+            urljoin(course.edx_instance.instance_url, '/api/courses/v1/blocks/'),
+            params={
                 "depth": "all",
                 "username": course.edx_instance.username,
                 "course_id": course.course_id,
