@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ccxcon',
-    version='0.0.0',
+    version='0.2.0',
     license='AGPLv3',
     author='MIT ODL Engineering',
     author_email='odl-engineering@mit.edu',
