@@ -2,6 +2,7 @@
 Module Population Tests
 """
 # pylint: disable=no-self-use,no-value-for-parameter
+from copy import deepcopy
 import json
 import os
 
@@ -171,3 +172,63 @@ class ModulePopulationTests(TestCase):
                 "Example Week 3: Be Social",
             ]
             assert actual == expected
+
+    def test_dont_populate_hidden_modules(self):
+        """
+        If some modules are marked as hidden, don't populate them.
+        """
+        # Find a chapter block
+        first_module_locator_id = None
+        first_module_title = None
+        for block in self.structure_response['blocks'].values():
+            if block['type'] == 'chapter':
+                first_module_locator_id = block['id']
+                first_module_title = block['display_name']
+                break
+
+        response_with_hidden = deepcopy(self.structure_response)
+        response_with_hidden['blocks'][first_module_locator_id][
+            'visible_to_staff_only'] = True
+
+        course = CourseFactory.create()
+        with mock.patch('courses.tasks.requests', autospec=True) as m_req:
+            m_req.get.return_value.status_code = 200
+            m_req.get.return_value.json = lambda: response_with_hidden
+
+            # initial population. Known to work via `test_module_ordering`
+            module_population(course.course_id)
+
+        # Expect that the hidden module's title is not present
+        titles = {module.title for module in course.module_set.all()}
+        assert first_module_title not in titles
+
+    def test_delete_existing_hidden_modules(self):
+        """
+        If some modules are newly marked as hidden, delete them.
+        """
+        course = CourseFactory.create()
+        with mock.patch('courses.tasks.requests', autospec=True) as m_req:
+            m_req.get.return_value.status_code = 200
+            m_req.get.return_value.json = lambda: self.structure_response
+
+            # initial population. Known to work via `test_module_ordering`
+            module_population(course.course_id)
+
+        # Change a chapter to be hidden instead
+        first_module = Module.objects.first()
+        first_module_locator_id = first_module.locator_id
+        first_module_title = first_module.title
+        response_with_hidden = deepcopy(self.structure_response)
+        response_with_hidden['blocks'][first_module_locator_id][
+            'visible_to_staff_only'] = True
+
+        with mock.patch('courses.tasks.requests', autospec=True) as m_req:
+            m_req.get.return_value.status_code = 200
+            m_req.get.return_value.json = lambda: response_with_hidden
+
+            # initial population. Known to work via `test_module_ordering`
+            module_population(course.course_id)
+
+        # Expect that the hidden module's title is not present
+        titles = {module.title for module in course.module_set.all()}
+        assert first_module_title not in titles

@@ -169,8 +169,8 @@ def create_ccx(request):
 
     try:
         resp = requests.post(
-            '{instance}/api/ccx/v0/ccx/'.format(instance=course.edx_instance.instance_url),
-            data=payload,
+            parse.urljoin(course.edx_instance.instance_url, '/api/ccx/v0/ccx/'),
+            json=payload,
             headers={
                 'Authorization': 'Bearer {}'.format(access_token),
             })
