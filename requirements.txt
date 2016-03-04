@@ -17,3 +17,4 @@ redis==2.10.5
 fake-factory==0.5.3
 factory_boy==2.6.0
 django-server-status==0.2
+requests-oauthlib==0.6.0
