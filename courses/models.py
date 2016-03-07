@@ -58,6 +58,12 @@ class Course(models.Model):
             'title': self.title,
             'external_pk': str(self.uuid),
             'instance': self.edx_instance.instance_url,
+            'course_id': self.course_id,
+            'author_name': self.author_name,
+            'overview': self.overview,
+            'description': self.description,
+            'image_url': self.image_url,
+            'instructors': [str(instructor) for instructor in self.instructors.all()],
         }
 
 

@@ -24,11 +24,17 @@ class CourseTests(TestCase):
         """
         test to_webhook implementation returns valid json object
         """
-        course = CourseFactory.build()
+        course = CourseFactory.create()
         out = course.to_webhook()
         json.dumps(out)  # Test to ensure it's json dumpable.
         ex_pk = out['external_pk']
         assert out['instance'] == course.edx_instance.instance_url
+        assert out['course_id'] == course.course_id
+        assert out['author_name'] == course.author_name
+        assert out['overview'] == course.overview
+        assert out['description'] == course.description
+        assert out['image_url'] == course.image_url
+        assert out['instructors'] == [str(instructor) for instructor in course.instructors.all()]
         assert isinstance(ex_pk, str)
         assert '-' in ex_pk
 
