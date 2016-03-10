@@ -12,6 +12,7 @@ from requests.exceptions import RequestException
 from courses.factories import CourseFactory, ModuleFactory, EdxAuthorFactory
 from courses.models import EdxAuthor, Course
 from oauth_mgmt.factories import BackingInstanceFactory
+from oauth_mgmt.utils import UnretrievableToken
 
 COURSE_ID = "course-locator:$org+$course.$run+branch+$branch+version+$version+type"
 
@@ -386,7 +387,8 @@ class CCXCreateTests(ApiTests):
             )
 
             assert result.status_code == 400, result.content.decode('utf-8')
-            assert re.search('POST argument.*{}'.format(key).encode(), result.content)
+            assert 'error' in result.json().keys()
+            assert re.search('POST argument.*{}'.format(key), result.json()['error'])
 
     def test_unknown_course_throws_404(self):
         """If we're given an unknown master_course_id, throw a 404"""
@@ -413,6 +415,7 @@ class CCXCreateTests(ApiTests):
             )
 
             assert result.status_code == 502, result.content.decode('utf-8')
+            assert 'Could not make request' in result.json()['error']
 
     def test_errory_status_code_returns_error(self):
         """If we get a status code from edx that looks error-y, throw an error"""
@@ -421,7 +424,7 @@ class CCXCreateTests(ApiTests):
 
         with mock.patch('courses.views.requests', autospec=True) as mock_req:
             mock_req.post.return_value.status_code = 500
-            mock_req.post.return_value.content = 'some error text'
+            mock_req.post.return_value.json.return_value = {}
 
             result = self.client.post(
                 reverse('create-ccx'),
@@ -430,6 +433,7 @@ class CCXCreateTests(ApiTests):
             )
 
             assert result.status_code == 502, result.content.decode('utf-8')
+            assert 'Invalid status code' in result.json()['error']
 
     def test_201_on_happy_case(self):
         """If all goes well, return 201"""
@@ -440,6 +444,7 @@ class CCXCreateTests(ApiTests):
 
         with mock.patch('courses.views.requests', autospec=True) as mock_req:
             mock_req.post.return_value.status_code = 201
+            mock_req.post.return_value.json.return_value = {}
 
             result = self.client.post(reverse('create-ccx'), json.dumps({
                 'master_course_id': str(course.uuid),
@@ -466,7 +471,8 @@ class CCXCreateTests(ApiTests):
             content_type="application/json"
         )
         assert result.status_code == 400, result.content.decode('utf-8')
-        assert re.search(b'UUID do not belong to the specified master course', result.content)
+        assert re.search('UUID do not belong to the specified master course',
+                         result.json()['error'])
 
     def test_201_on_happy_case_with_modules(self):
         """
@@ -480,6 +486,8 @@ class CCXCreateTests(ApiTests):
 
         with mock.patch('courses.views.requests', autospec=True) as mock_req:
             mock_req.post.return_value.status_code = 201
+            mock_req.post.return_value.json.return_value = {}
+
             result = self.client.post(
                 reverse('create-ccx'),
                 json.dumps(payload),
@@ -525,3 +533,24 @@ class CCXCreateTests(ApiTests):
         }), content_type="application/json")
 
         assert result.status_code == 401, result.content.decode('utf-8')
+
+    def test_access_token_fails(self):
+        """
+        If we can't get an access token, give a reasonable error.
+        """
+        course = CourseFactory.create()
+        user_email = "john@example.com"
+        seats = 123
+        name = "CCX example title"
+
+        with mock.patch('courses.views.get_access_token', autospec=True) as token:
+            token.side_effect = UnretrievableToken
+
+            result = self.client.post(reverse('create-ccx'), json.dumps({
+                'master_course_id': str(course.uuid),
+                'user_email': user_email,
+                'total_seats': seats,
+                'display_name': name
+            }), content_type="application/json")
+
+        assert "Could not fetch access token" in result.json()['error']

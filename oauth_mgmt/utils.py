@@ -4,6 +4,7 @@ Utility functions.
 from datetime import timedelta
 from six.moves.urllib.parse import urljoin  # pylint: disable=import-error
 
+from six.moves.urllib.parse import urljoin  # pylint: disable=import-error
 from django.utils.timezone import now
 import requests
 

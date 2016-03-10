@@ -16,7 +16,7 @@ from rest_framework.mixins import (
 )
 from rest_framework.response import Response
 
-from oauth_mgmt.utils import get_access_token
+from oauth_mgmt.utils import get_access_token, UnretrievableToken
 from .models import Course, Module, EdxAuthor
 from .serializers import CourseSerializer, ModuleSerializer
 from .tasks import module_population
@@ -142,7 +142,12 @@ def create_ccx(request):
         })
 
     course = get_object_or_404(Course, uuid=data['master_course_id'])
-    access_token = get_access_token(course.edx_instance)
+
+    try:
+        access_token = get_access_token(course.edx_instance)
+    except (UnretrievableToken,):
+        return upstream_error('Could not fetch access token.')
+
     user_email = data['user_email']
 
     payload = {
@@ -175,13 +180,13 @@ def create_ccx(request):
                 'Authorization': 'Bearer {}'.format(access_token),
             })
     except RequestException as e:
-        return upstream_error(e)
+        return upstream_error('Could not make request. {}'.format(e))
 
     if resp.status_code >= 300:
-        return upstream_error(resp.content)
+        return upstream_error('Invalid status code for edx request, {}'.format(resp.status_code))
 
     log.info(
         'Created ccx course for user %s on master course %s. Response: %s',
-        user_email, course, resp.content)
+        user_email, course, resp.json())
 
-    return Response(status=201)
+    return Response(resp.json(), status=201)
